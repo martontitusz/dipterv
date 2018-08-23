@@ -1,0 +1,2 @@
+# dipterv
+Diplomatervezés
