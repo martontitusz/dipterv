@@ -57,6 +57,8 @@
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osThreadId LedTaskHandle;
+osThreadId RadioTaskHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -64,6 +66,8 @@ osThreadId defaultTaskHandle;
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
+void LedTaskFunction(void const * argument);
+void RadioTaskFunction(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -97,6 +101,14 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of LedTask */
+  osThreadDef(LedTask, LedTaskFunction, osPriorityLow, 0, 128);
+  LedTaskHandle = osThreadCreate(osThread(LedTask), NULL);
+
+  /* definition and creation of RadioTask */
+  osThreadDef(RadioTask, RadioTaskFunction, osPriorityHigh, 0, 512);
+  RadioTaskHandle = osThreadCreate(osThread(RadioTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -117,6 +129,30 @@ void StartDefaultTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
+}
+
+/* LedTaskFunction function */
+__weak void LedTaskFunction(void const * argument)
+{
+  /* USER CODE BEGIN LedTaskFunction */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END LedTaskFunction */
+}
+
+/* RadioTaskFunction function */
+__weak void RadioTaskFunction(void const * argument)
+{
+  /* USER CODE BEGIN RadioTaskFunction */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END RadioTaskFunction */
 }
 
 /* USER CODE BEGIN Application */
