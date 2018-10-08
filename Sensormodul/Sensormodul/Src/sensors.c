@@ -7,19 +7,31 @@
 
 #include "sensors.h"
 
-//extern float Temperature;
-//extern float Humidity;
+extern uint8_t TemperatureBuffer[2];
+extern uint8_t HumidityBuffer[2];
 
+extern osSemaphoreId TemperatureSemaphoreHandle;
+extern osSemaphoreId HumiditySemaphoreHandle;
 
 void SensorsTaskFunction(void const * argument)
 {
 	for(;;)
 	{
-//		HDC2010_TriggerMeasurement();
-//		HAL_Delay(100);
-//		Temperature	= HDC2010_GetTemperature();
-//		Humidity	= HDC2010_GetHumidity();
+		HDC2010_TriggerMeasurement();
+		HAL_Delay(100);
 
-		osDelay(10);
+		if (xSemaphoreTake(TemperatureSemaphoreHandle, 100))
+		{
+			HDC2010_GetTemperature(TemperatureBuffer);
+			xSemaphoreGive(TemperatureSemaphoreHandle);
+		}
+
+		if (xSemaphoreTake(HumiditySemaphoreHandle, 100))
+		{
+			HDC2010_GetHumidity(HumidityBuffer);
+			xSemaphoreGive(HumiditySemaphoreHandle);
+		}
+
+		osDelay(1000);
 	}
 }

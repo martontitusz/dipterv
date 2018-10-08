@@ -80,6 +80,8 @@ void MX_FREERTOS_Init(void);
 
 /* USER CODE BEGIN 0 */
 uint8_t NumberOfAvailablePackets = 0;
+uint8_t I2C_TxBuffer[RADIO_PACKET_LENGTH];
+bool isI2CBusy = false;
 /* USER CODE END 0 */
 
 /**
@@ -201,6 +203,11 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	isI2CBusy = false;
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -220,7 +227,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
   /* USER CODE END Callback 1 */
 }
 

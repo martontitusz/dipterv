@@ -16,7 +16,7 @@ void LedTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		if (NumberOfAvailablePackets)
+		if ((NumberOfAvailablePackets % 2) == 1)
 		{
 			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
 		}
@@ -25,8 +25,15 @@ void LedTaskFunction(void const * argument)
 			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
 		}
 
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+		if ((NumberOfAvailablePackets % 4) > 1)
+		{
+			HAL_GPIO_WritePin(LED0_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+		}
+		else
+		{
+			HAL_GPIO_WritePin(LED0_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+		}
 
-		osDelay(500);
+		osDelay(10);
 	}
 }

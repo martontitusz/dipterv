@@ -55,6 +55,8 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "stm32l476xx.h"
+#include "stdint.h"
 #include "sensors.h"
 #include "radio.h"
 /* USER CODE END Includes */
@@ -63,6 +65,13 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+float Temperature	= 0.0;
+float Humidity		= 0.0;
+
+uint8_t TemperatureBuffer[2];
+uint8_t HumidityBuffer[2];
+
 
 /* USER CODE END PV */
 
@@ -87,8 +96,9 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	float Temperature = 0.0;
-	float Humidity = 0.0;
+
+
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/

@@ -41,7 +41,7 @@ int16_t HDC2010_ConcatenateTo16Bits(int8_t highByte, int8_t lowByte);
 float HDC2010_CalculateTemperature(int16_t temp16);
 float HDC2010_CalculateHumidity(int16_t hum16);
 int HDC2010_TriggerMeasurement(void);
-float HDC2010_GetTemperature(void);
-float HDC2010_GetHumidity(void);
+int HDC2010_GetTemperature(uint8_t* temperaturebuffer);
+int HDC2010_GetHumidity(uint8_t* humiditybuffer);
 
 #endif /* HDC2010_H_ */

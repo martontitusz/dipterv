@@ -59,6 +59,8 @@
 osThreadId defaultTaskHandle;
 osThreadId RadioTaskHandle;
 osThreadId SensorsTaskHandle;
+osSemaphoreId TemperatureSemaphoreHandle;
+osSemaphoreId HumiditySemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -87,6 +89,15 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of TemperatureSemaphore */
+  osSemaphoreDef(TemperatureSemaphore);
+  TemperatureSemaphoreHandle = osSemaphoreCreate(osSemaphore(TemperatureSemaphore), 1);
+
+  /* definition and creation of HumiditySemaphore */
+  osSemaphoreDef(HumiditySemaphore);
+  HumiditySemaphoreHandle = osSemaphoreCreate(osSemaphore(HumiditySemaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

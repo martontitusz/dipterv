@@ -32,7 +32,7 @@ int HDC2010_TriggerMeasurement(void)
 
 	if (HAL_I2C_Master_Transmit(&hi2c1, HDC2010_SLAVE_ADDRESS << 1, localbuffer, 2, 100) != HAL_OK)
 	{
-		while(1) {}
+		return -1;
 	}
 	else
 	{
@@ -40,7 +40,7 @@ int HDC2010_TriggerMeasurement(void)
 	}
 }
 
-float HDC2010_GetTemperature(void)
+int HDC2010_GetTemperature(uint8_t* temperaturebuffer)
 {
 	uint8_t localbuffer[2];
 
@@ -48,7 +48,7 @@ float HDC2010_GetTemperature(void)
 
 	if (HAL_I2C_Master_Transmit(&hi2c1, HDC2010_SLAVE_ADDRESS << 1, localbuffer, 1, 100) != HAL_OK)
 	{
-		while(1) {}
+		return -1;
 	}
 
 	localbuffer[0] = 0x00;
@@ -56,15 +56,16 @@ float HDC2010_GetTemperature(void)
 
 	if(HAL_I2C_Master_Receive(&hi2c1, HDC2010_SLAVE_ADDRESS << 1, localbuffer, 2, 100) != HAL_OK)
 	{
-		while(1) {}
+		return -1;
 	}
 
-	float tmp = HDC2010_ConcatenateTo16Bits(localbuffer[1], localbuffer[0]);
+	temperaturebuffer[0] = localbuffer[0];	/*	Low byte	*/
+	temperaturebuffer[1] = localbuffer[1];	/*	High byte	*/
 
-	return HDC2010_CalculateTemperature(tmp);
+	return 0;
 }
 
-float HDC2010_GetHumidity(void)
+int HDC2010_GetHumidity(uint8_t* humiditybuffer)
 {
 	uint8_t localbuffer[2];
 
@@ -72,7 +73,7 @@ float HDC2010_GetHumidity(void)
 
 	if (HAL_I2C_Master_Transmit(&hi2c1, HDC2010_SLAVE_ADDRESS << 1, localbuffer, 1, 100) != HAL_OK)
 	{
-		while(1) {}
+		return -1;
 	}
 
 	localbuffer[0] = 0x00;
@@ -80,10 +81,11 @@ float HDC2010_GetHumidity(void)
 
 	if(HAL_I2C_Master_Receive(&hi2c1, HDC2010_SLAVE_ADDRESS << 1, localbuffer, 2, 100) != HAL_OK)
 	{
-		while(1) {}
+		return -1;
 	}
 
-	float tmp = HDC2010_ConcatenateTo16Bits(localbuffer[1], localbuffer[0]);
+	humiditybuffer[0] = localbuffer[0];	/* Low byte */
+	humiditybuffer[1] = localbuffer[1];	/* Low byte */
 
-	return HDC2010_CalculateHumidity(tmp);
+	return 0;
 }

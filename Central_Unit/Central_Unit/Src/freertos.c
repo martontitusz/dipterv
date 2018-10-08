@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : freertos.c
@@ -45,40 +46,61 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
+#include "main.h"
 #include "cmsis_os.h"
 
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 
 /* USER CODE END Includes */
 
-/* Variables -----------------------------------------------------------------*/
-osThreadId defaultTaskHandle;
-osThreadId LedTaskHandle;
-osThreadId RadioTaskHandle;
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
 
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
+osThreadId defaultTaskHandle;
+osThreadId LedTaskHandle;
+osThreadId RadioTaskHandle;
+osThreadId RaspberryPiTaskHandle;
+osMessageQId RadioPacketQueueHandle;
 
-/* Function prototypes -------------------------------------------------------*/
-void StartDefaultTask(void const * argument);
-void LedTaskFunction(void const * argument);
-void RadioTaskFunction(void const * argument);
-
-void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-
+/* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
 
-/* Hook prototypes */
+void StartDefaultTask(void const * argument);
+void LedTaskFunction(void const * argument);
+void RadioTaskFunction(void const * argument);
+void RaspberryPiTaskFunction(void const * argument);
 
-/* Init FreeRTOS */
+void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
        
@@ -109,16 +131,32 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(RadioTask, RadioTaskFunction, osPriorityHigh, 0, 512);
   RadioTaskHandle = osThreadCreate(osThread(RadioTask), NULL);
 
+  /* definition and creation of RaspberryPiTask */
+  osThreadDef(RaspberryPiTask, RaspberryPiTaskFunction, osPriorityIdle, 0, 512);
+  RaspberryPiTaskHandle = osThreadCreate(osThread(RaspberryPiTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the queue(s) */
+  /* definition and creation of RadioPacketQueue */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(RadioPacketQueue, 5, 22);
+  RadioPacketQueueHandle = osMessageCreate(osMessageQ(RadioPacketQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 }
 
-/* StartDefaultTask function */
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used 
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
 
@@ -131,7 +169,13 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* LedTaskFunction function */
+/* USER CODE BEGIN Header_LedTaskFunction */
+/**
+* @brief Function implementing the LedTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_LedTaskFunction */
 __weak void LedTaskFunction(void const * argument)
 {
   /* USER CODE BEGIN LedTaskFunction */
@@ -143,7 +187,13 @@ __weak void LedTaskFunction(void const * argument)
   /* USER CODE END LedTaskFunction */
 }
 
-/* RadioTaskFunction function */
+/* USER CODE BEGIN Header_RadioTaskFunction */
+/**
+* @brief Function implementing the RadioTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_RadioTaskFunction */
 __weak void RadioTaskFunction(void const * argument)
 {
   /* USER CODE BEGIN RadioTaskFunction */
@@ -155,6 +205,25 @@ __weak void RadioTaskFunction(void const * argument)
   /* USER CODE END RadioTaskFunction */
 }
 
+/* USER CODE BEGIN Header_RaspberryPiTaskFunction */
+/**
+* @brief Function implementing the RaspberryPiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_RaspberryPiTaskFunction */
+__weak void RaspberryPiTaskFunction(void const * argument)
+{
+  /* USER CODE BEGIN RaspberryPiTaskFunction */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END RaspberryPiTaskFunction */
+}
+
+/* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
      
 /* USER CODE END Application */
