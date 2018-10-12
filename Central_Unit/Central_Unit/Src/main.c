@@ -206,6 +206,7 @@ void SystemClock_Config(void)
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	isI2CBusy = false;
+	HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, RESET);
 }
 
 /* USER CODE END 4 */

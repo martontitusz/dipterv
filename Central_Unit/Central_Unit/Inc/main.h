@@ -130,7 +130,8 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
-
+#define RPI_GPIO_I2C_BUSY_PIN	RPI_GPIO0_Pin
+#define RPI_GPIO_I2C_BUSY_PORT	RPI_GPIO0_GPIO_Port
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
