@@ -128,11 +128,11 @@ void MX_FREERTOS_Init(void) {
   LedTaskHandle = osThreadCreate(osThread(LedTask), NULL);
 
   /* definition and creation of RadioTask */
-  osThreadDef(RadioTask, RadioTaskFunction, osPriorityHigh, 0, 512);
+  osThreadDef(RadioTask, RadioTaskFunction, osPriorityAboveNormal, 0, 512);
   RadioTaskHandle = osThreadCreate(osThread(RadioTask), NULL);
 
   /* definition and creation of RaspberryPiTask */
-  osThreadDef(RaspberryPiTask, RaspberryPiTaskFunction, osPriorityIdle, 0, 512);
+  osThreadDef(RaspberryPiTask, RaspberryPiTaskFunction, osPriorityHigh, 0, 512);
   RaspberryPiTaskHandle = osThreadCreate(osThread(RaspberryPiTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -142,7 +142,7 @@ void MX_FREERTOS_Init(void) {
   /* Create the queue(s) */
   /* definition and creation of RadioPacketQueue */
 /* what about the sizeof here??? cd native code */
-  osMessageQDef(RadioPacketQueue, 5, 22);
+  osMessageQDef(RadioPacketQueue, 5, 4);
   RadioPacketQueueHandle = osMessageCreate(osMessageQ(RadioPacketQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */

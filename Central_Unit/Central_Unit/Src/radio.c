@@ -10,8 +10,10 @@
 SX1278_hw_t	SX1278_hw;
 SX1278_t	SX1278;
 
+struct radiopacket_t *pRadioRxPacket;
 extern SPI_HandleTypeDef hspi1;
 extern osMessageQId RadioPacketQueueHandle;
+
 
 void RadioInitLoraModule(void)
 {
@@ -45,10 +47,12 @@ uint8_t RadioReceivePacket(void)
 	if (received_bytes > 0)
 	{
 		SX1278_read(&SX1278, RadioPacket.bytes, received_bytes);
-		xQueueSend(RadioPacketQueueHandle, RadioPacket.bytes, 10);
+		if (xQueueSendToBack(RadioPacketQueueHandle, (void *) &pRadioRxPacket, (TickType_t)10) != pdPASS)
+		{
+			/* Failed to post the message, even after 10 ticks. */
+			while(1);
+		}
 	}
-
-
 
 	return 0;
 }
@@ -58,6 +62,8 @@ void RadioTaskFunction(void const * argument)
 {
 	RadioInitLoraModule();
 	RadioConfigLoraModule();
+
+	pRadioRxPacket = & RadioPacket.packet;
 
 	for(;;)
 	{

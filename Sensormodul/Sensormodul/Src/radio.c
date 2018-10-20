@@ -12,6 +12,7 @@ SX1278_t 	SX1278;
 
 extern uint8_t TemperatureBuffer[2];
 extern uint8_t HumidityBuffer[2];
+extern bool dataAvailable;
 
 extern SPI_HandleTypeDef hspi1;
 
@@ -95,7 +96,9 @@ void RadioFillIds(void)
 {
 	RadioFillDeviceId();
 	RadioFillTemperatureId();
+	RadioFillTemperatureData();
 	RadioFillHumidityId();
+	RadioFillHumidityData();
 }
 
 void RadioFillTemperatureData(void)
@@ -113,8 +116,11 @@ void RadioFillHumidityData(void)
 {
 	if (xSemaphoreTake(HumiditySemaphoreHandle, 100))
 	{
-		RadioPacket.packet.humidity[0] = HumidityBuffer[0];
-		RadioPacket.packet.humidity[1] = HumidityBuffer[1];
+		//RadioPacket.packet.humidity[0] = HumidityBuffer[0];
+		//RadioPacket.packet.humidity[1] = HumidityBuffer[1];
+
+		RadioPacket.packet.humidity[0] = 120;
+		RadioPacket.packet.humidity[1] = 210;
 
 		xSemaphoreGive(HumiditySemaphoreHandle);
 	}
@@ -136,8 +142,11 @@ void RadioTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		RadioTransmitPacket(RadioPacket.bytes, RADIO_PACKET_LENGTH);
-		RadioIncreasePacketId();
+		if (dataAvailable == true)
+		{
+			RadioTransmitPacket(RadioPacket.bytes, RADIO_PACKET_LENGTH);
+			RadioIncreasePacketId();
+		}
 
 		osDelay(1000);
 	}

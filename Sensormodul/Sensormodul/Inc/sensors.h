@@ -12,6 +12,7 @@
 #include "HDC2010.h"
 #include "stm32l4xx_hal.h"
 #include "cmsis_os.h"
+#include "stdbool.h"
 
 
 void SensorsTaskFunction(void const * argument);

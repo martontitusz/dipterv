@@ -9,16 +9,19 @@
 
 extern uint8_t TemperatureBuffer[2];
 extern uint8_t HumidityBuffer[2];
+extern bool dataAvailable;
 
 extern osSemaphoreId TemperatureSemaphoreHandle;
 extern osSemaphoreId HumiditySemaphoreHandle;
 
 void SensorsTaskFunction(void const * argument)
 {
+	osDelay(3000);
+
 	for(;;)
 	{
 		HDC2010_TriggerMeasurement();
-		HAL_Delay(100);
+		osDelay(100);
 
 		if (xSemaphoreTake(TemperatureSemaphoreHandle, 100))
 		{
@@ -32,6 +35,10 @@ void SensorsTaskFunction(void const * argument)
 			xSemaphoreGive(HumiditySemaphoreHandle);
 		}
 
+		if (dataAvailable == false)
+		{
+			dataAvailable = true;
+		}
 		osDelay(1000);
 	}
 }
