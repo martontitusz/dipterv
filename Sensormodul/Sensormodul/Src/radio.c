@@ -10,14 +10,12 @@
 SX1278_hw_t SX1278_hw;
 SX1278_t 	SX1278;
 
-extern uint8_t TemperatureBuffer[2];
-extern uint8_t HumidityBuffer[2];
-extern bool dataAvailable;
+uint8_t *pRxTemperature;
+uint8_t *pRxHumidity;
 
+extern osMessageQId TemperatureQueueHandle;
+extern osMessageQId HumidityQueueHandle;
 extern SPI_HandleTypeDef hspi1;
-
-extern osSemaphoreId TemperatureSemaphoreHandle;
-extern osSemaphoreId HumiditySemaphoreHandle;
 
 void RadioInitLoraModule(void)
 {
@@ -58,28 +56,23 @@ uint8_t RadioReceivePacket(uint8_t* message_buffer)
 
 void RadioPacketBuilder(void)
 {
-	RadioFillPacketCounter();
+	RadioIncreasePacketId();
 	RadioFillTemperatureData();
 	RadioFillHumidityData();
 }
 
 void GetUniqueId(void)
 {
-	DeviceId.bytes[0]	= HAL_GetUIDw0();
-	DeviceId.bytes[1]	= HAL_GetUIDw1();
-	DeviceId.bytes[2]	= HAL_GetUIDw2();
+	DeviceId.words[0]	= HAL_GetUIDw0();
+	DeviceId.words[1]	= HAL_GetUIDw1();
+	DeviceId.words[2]	= HAL_GetUIDw2();
 }
 
 void RadioFillDeviceId(void)
 {
-	RadioPacket.packet.deviceId[0]	= DeviceId.bytes[0];
-	RadioPacket.packet.deviceId[1]	= DeviceId.bytes[1];
-	RadioPacket.packet.deviceId[2]	= DeviceId.bytes[2];
-}
-
-void RadioFillPacketCounter(void)
-{
-	RadioPacket.packet.packetId++;
+	RadioPacket.packet.deviceId[0]	= DeviceId.words[0];
+	RadioPacket.packet.deviceId[1]	= DeviceId.words[1];
+	RadioPacket.packet.deviceId[2]	= DeviceId.words[2];
 }
 
 void RadioFillTemperatureId(void)
@@ -96,33 +89,34 @@ void RadioFillIds(void)
 {
 	RadioFillDeviceId();
 	RadioFillTemperatureId();
-	RadioFillTemperatureData();
 	RadioFillHumidityId();
-	RadioFillHumidityData();
 }
 
 void RadioFillTemperatureData(void)
 {
-	if (xSemaphoreTake(TemperatureSemaphoreHandle, 100))
+	if (uxQueueMessagesWaiting(TemperatureQueueHandle))
 	{
-		RadioPacket.packet.temperature[0] = TemperatureBuffer[0];
-		RadioPacket.packet.temperature[1] = TemperatureBuffer[1];
+		if (xQueueReceive(TemperatureQueueHandle, &(pRxTemperature), (TickType_t)10) != pdTRUE)
+		{
+			while (1);
+		}
 
-		xSemaphoreGive(TemperatureSemaphoreHandle);
+		RadioPacket.packet.temperature[0] = pRxTemperature[0];
+		RadioPacket.packet.temperature[1] = pRxTemperature[1];
 	}
 }
 
 void RadioFillHumidityData(void)
 {
-	if (xSemaphoreTake(HumiditySemaphoreHandle, 100))
+	if (uxQueueMessagesWaiting(HumidityQueueHandle))
 	{
-		//RadioPacket.packet.humidity[0] = HumidityBuffer[0];
-		//RadioPacket.packet.humidity[1] = HumidityBuffer[1];
+		if (xQueueReceive(HumidityQueueHandle, &(pRxHumidity), (TickType_t)10) != pdTRUE)
+		{
+			while (1);
+		}
 
-		RadioPacket.packet.humidity[0] = 120;
-		RadioPacket.packet.humidity[1] = 210;
-
-		xSemaphoreGive(HumiditySemaphoreHandle);
+		RadioPacket.packet.humidity[0] = pRxHumidity[0];
+		RadioPacket.packet.humidity[1] = pRxHumidity[1];
 	}
 }
 
@@ -142,11 +136,8 @@ void RadioTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		if (dataAvailable == true)
-		{
-			RadioTransmitPacket(RadioPacket.bytes, RADIO_PACKET_LENGTH);
-			RadioIncreasePacketId();
-		}
+		RadioPacketBuilder();
+		RadioTransmitPacket(RadioPacket.bytes, RADIO_PACKET_LENGTH);
 
 		osDelay(1000);
 	}

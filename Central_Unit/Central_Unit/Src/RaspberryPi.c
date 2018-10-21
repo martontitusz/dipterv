@@ -10,7 +10,6 @@
 extern osMessageQId RadioPacketQueueHandle;
 extern I2C_HandleTypeDef hi2c1;
 extern bool isI2CBusy;
-extern bool isAddressOk;
 union radiopacket_union_t tempRadioPacket;
 extern uint8_t NumberOfAvailablePackets;
 

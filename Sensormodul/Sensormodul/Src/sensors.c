@@ -7,38 +7,59 @@
 
 #include "sensors.h"
 
-extern uint8_t TemperatureBuffer[2];
-extern uint8_t HumidityBuffer[2];
-extern bool dataAvailable;
+extern osMessageQId TemperatureQueueHandle;
+extern osMessageQId HumidityQueueHandle;
 
-extern osSemaphoreId TemperatureSemaphoreHandle;
-extern osSemaphoreId HumiditySemaphoreHandle;
+uint8_t TemperatureBuffer[2];
+uint8_t HumidityBuffer[2];
+
+uint8_t *pTemperature;
+uint8_t *pHumidity;
+
+
+void SensorsTriggerMeasurement(void)
+{
+	HDC2010_TriggerMeasurement();
+	osDelay(100);
+}
+
+void SensorsGetTemperature(void)
+{
+	HDC2010_GetTemperature(TemperatureBuffer);
+	if (xQueueSendToBack(TemperatureQueueHandle, (void *) &pTemperature, (TickType_t)10) != pdPASS)
+	{
+		/* Failed to post the message, even after 10 ticks. */
+		while(1);
+	}
+}
+
+void SensorsGetHumidity(void)
+{
+	HDC2010_GetHumidity(HumidityBuffer);
+	if (xQueueSendToBack(HumidityQueueHandle, (void *) &pHumidity, (TickType_t)10) != pdPASS)
+	{
+		/* Failed to post the message, even after 10 ticks. */
+		while(1);
+	}
+}
+
+void SensorsGetData(void)
+{
+	SensorsTriggerMeasurement();
+	SensorsGetTemperature();
+	SensorsGetHumidity();
+}
 
 void SensorsTaskFunction(void const * argument)
 {
 	osDelay(3000);
 
+	pTemperature	= TemperatureBuffer;
+	pHumidity		= HumidityBuffer;
+
 	for(;;)
 	{
-		HDC2010_TriggerMeasurement();
-		osDelay(100);
-
-		if (xSemaphoreTake(TemperatureSemaphoreHandle, 100))
-		{
-			HDC2010_GetTemperature(TemperatureBuffer);
-			xSemaphoreGive(TemperatureSemaphoreHandle);
-		}
-
-		if (xSemaphoreTake(HumiditySemaphoreHandle, 100))
-		{
-			HDC2010_GetHumidity(HumidityBuffer);
-			xSemaphoreGive(HumiditySemaphoreHandle);
-		}
-
-		if (dataAvailable == false)
-		{
-			dataAvailable = true;
-		}
+		SensorsGetData();
 		osDelay(1000);
 	}
 }

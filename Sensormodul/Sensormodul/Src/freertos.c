@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : freertos.c
@@ -45,42 +46,62 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
+#include "main.h"
 #include "cmsis_os.h"
 
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 
 /* USER CODE END Includes */
 
-/* Variables -----------------------------------------------------------------*/
-osThreadId defaultTaskHandle;
-osThreadId RadioTaskHandle;
-osThreadId SensorsTaskHandle;
-osSemaphoreId TemperatureSemaphoreHandle;
-osSemaphoreId HumiditySemaphoreHandle;
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
 
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
+osThreadId defaultTaskHandle;
+osThreadId RadioTaskHandle;
+osThreadId SensorsTaskHandle;
+osMessageQId TemperatureQueueHandle;
+osMessageQId HumidityQueueHandle;
+osSemaphoreId TemperatureSemaphoreHandle;
+osSemaphoreId HumiditySemaphoreHandle;
 
-/* Function prototypes -------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN FunctionPrototypes */
+
+/* USER CODE END FunctionPrototypes */
+
 void StartDefaultTask(void const * argument);
 void RadioTaskFunction(void const * argument);
 void SensorsTaskFunction(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
-/* USER CODE BEGIN FunctionPrototypes */
-
-/* USER CODE END FunctionPrototypes */
-
-/* Hook prototypes */
-
-/* Init FreeRTOS */
-
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
        
@@ -117,19 +138,36 @@ void MX_FREERTOS_Init(void) {
   RadioTaskHandle = osThreadCreate(osThread(RadioTask), NULL);
 
   /* definition and creation of SensorsTask */
-  osThreadDef(SensorsTask, SensorsTaskFunction, osPriorityNormal, 0, 512);
+  osThreadDef(SensorsTask, SensorsTaskFunction, osPriorityAboveNormal, 0, 512);
   SensorsTaskHandle = osThreadCreate(osThread(SensorsTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
+  /* Create the queue(s) */
+  /* definition and creation of TemperatureQueue */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(TemperatureQueue, 5, uint32_t);
+  TemperatureQueueHandle = osMessageCreate(osMessageQ(TemperatureQueue), NULL);
+
+  /* definition and creation of HumidityQueue */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(HumidityQueue, 5, uint32_t);
+  HumidityQueueHandle = osMessageCreate(osMessageQ(HumidityQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 }
 
-/* StartDefaultTask function */
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used 
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
 
@@ -142,7 +180,13 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* RadioTaskFunction function */
+/* USER CODE BEGIN Header_RadioTaskFunction */
+/**
+* @brief Function implementing the RadioTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_RadioTaskFunction */
 __weak void RadioTaskFunction(void const * argument)
 {
   /* USER CODE BEGIN RadioTaskFunction */
@@ -154,7 +198,13 @@ __weak void RadioTaskFunction(void const * argument)
   /* USER CODE END RadioTaskFunction */
 }
 
-/* SensorsTaskFunction function */
+/* USER CODE BEGIN Header_SensorsTaskFunction */
+/**
+* @brief Function implementing the SensorsTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_SensorsTaskFunction */
 __weak void SensorsTaskFunction(void const * argument)
 {
   /* USER CODE BEGIN SensorsTaskFunction */
@@ -166,6 +216,7 @@ __weak void SensorsTaskFunction(void const * argument)
   /* USER CODE END SensorsTaskFunction */
 }
 
+/* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
      
 /* USER CODE END Application */

@@ -142,7 +142,7 @@ void MX_FREERTOS_Init(void) {
   /* Create the queue(s) */
   /* definition and creation of RadioPacketQueue */
 /* what about the sizeof here??? cd native code */
-  osMessageQDef(RadioPacketQueue, 5, 4);
+  osMessageQDef(RadioPacketQueue, 5, uint32_t);
   RadioPacketQueueHandle = osMessageCreate(osMessageQ(RadioPacketQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */

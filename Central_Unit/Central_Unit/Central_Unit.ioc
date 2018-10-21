@@ -1,7 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK,configTOTAL_HEAP_SIZE,Queues01
-FREERTOS.Queues01=RadioPacketQueue,5,4,1,Dynamic,NULL,NULL
+FREERTOS.Queues01=RadioPacketQueue,5,uint32_t,0,Dynamic,NULL,NULL
 FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LedTask,-2,128,LedTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RadioTask,1,512,RadioTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RaspberryPiTask,2,512,RaspberryPiTaskFunction,As weak,NULL,Dynamic,NULL,NULL
 FREERTOS.configTOTAL_HEAP_SIZE=65536
 File.Version=6

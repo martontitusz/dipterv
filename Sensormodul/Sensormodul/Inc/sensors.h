@@ -15,6 +15,10 @@
 #include "stdbool.h"
 
 
+void SensorsTriggerMeasurement(void);
+void SensorsGetTemperature(void);
+void SensorsGetHumidity(void);
+void SensorsGetData(void);
 void SensorsTaskFunction(void const * argument);
 
 #endif /* SENSORS_H_ */
