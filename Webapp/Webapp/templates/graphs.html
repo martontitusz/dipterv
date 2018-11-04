@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class='box' align='center'>
+        <div class='graph' align='center'>
+            <embed type="image/svg+xml" src={{temperature_graph_data|safe}} align=center style='max-width:1000px'/>
+        </div>
+        <div class='gauge' align='right'>
+            <embed type="image/svg+xml" src={{maxtemperature1_data|safe}} align=center style='max-width:400px'/>
+            <embed type="image/svg+xml" src={{maxtemperature2_data|safe}} align=center style='max-width:400px'/>
+        </div>
+    </div>
+
+    <div class='box' align='center'>
+        <div class='graph' align='center'>
+            <embed type="image/svg+xml" src={{humidity_graph_data|safe}} align=center style='max-width:1000px'/>
+        </div>
+        <div class='gauge' align='right'>
+            <embed type="image/svg+xml" src={{maxhumidity1_data|safe}} align=right style='max-width:400px'/>
+            <embed type="image/svg+xml" src={{maxhumidity2_data|safe}} align=right style='max-width:400px'/>
+        </div>
+    </div>
+
+{% endblock content %}
