@@ -81,7 +81,8 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN 0 */
 uint8_t NumberOfAvailablePackets = 0;
 uint8_t I2C_TxBuffer[RADIO_PACKET_LENGTH];
-bool isI2CBusy = false;
+bool isI2CBusy		=	false;
+bool isAddressOk	=	false;
 /* USER CODE END 0 */
 
 /**
@@ -203,10 +204,20 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	HAL_I2C_EnableListen_IT(&hi2c1);
+}
+
+void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
+{
+	isAddressOk = true;
+}
+
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
+	HAL_I2C_EnableListen_IT(&hi2c1);
 	isI2CBusy = false;
-	HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, RESET);
 }
 
 /* USER CODE END 4 */

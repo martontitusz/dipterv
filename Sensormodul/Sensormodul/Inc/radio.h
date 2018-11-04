@@ -52,7 +52,6 @@ uint8_t RadioReceivePacket(uint8_t* message_buffer);
 void RadioPacketBuilder(void);
 void GetUniqueId(void);
 void RadioFillDeviceId(void);
-void RadioFillPacketCounter(void);
 void RadioFillTemperatureId(void);
 void RadioFillHumidityId(void);
 void RadioFillIds(void);

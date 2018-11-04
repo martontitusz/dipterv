@@ -19,12 +19,14 @@
 #define RADIO_TEMPERATUREDATA_ID	1
 #define RADIO_HUMIDITYDATA_ID		2
 
-union {
+union
+{
 	uint32_t	words[3];
 	uint8_t		bytes[12];
 } DeviceId;
 
-union {
+union
+{
 	uint32_t	words;
 	uint8_t		bytes[4];
 } PacketId;
@@ -39,7 +41,8 @@ struct radiopacket_t
 	uint8_t humidity[2];
 };
 
-union radiopacket_union_t {
+union radiopacket_union_t
+{
 	struct radiopacket_t packet;
 	uint8_t bytes[22];
 } RadioPacket;

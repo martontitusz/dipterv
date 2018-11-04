@@ -71,6 +71,7 @@ float Humidity		= 0.0;
 
 uint8_t TemperatureBuffer[2];
 uint8_t HumidityBuffer[2];
+bool dataAvailable = false;
 
 
 /* USER CODE END PV */
