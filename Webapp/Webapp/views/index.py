@@ -37,7 +37,7 @@ def showgraphs():
         temperature_line_chart.x_labels = map(str, range(0, max(max(pId1),max(pId2))))
         temperature_line_chart.add('Sensor1',   temp1)
         temperature_line_chart.add('Sensor2',   temp2)
-        temperature_line_chart.range = [0, 60]
+        temperature_line_chart.range = [min(min(temp1),min(temp2))-5, max(max(temp1),max(temp2))+5]
         temperature_graph_data = temperature_line_chart.render_data_uri()
 
         humidity_line_chart = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
