@@ -60,7 +60,7 @@ def I2C_GetDataFunction():
         Humidity        = getHumidity(block)
 
         fillTextbox(ID0, ID1, ID2, Temperature, Humidity)
-        data = (ID0+","+ID1+","+ID2+","+str(PackageID)+","+str(TemperatureID)+","+str(Temperature)+","+str(HumidityID)+","+str(Humidity))
+        data = (","+ID0+","+ID1+","+ID2+","+str(PackageID)+","+str(TemperatureID)+","+str(Temperature)+","+str(HumidityID)+","+str(Humidity)+",")
         
         #publishing data via MQTT
         #topic, payload, hostname
