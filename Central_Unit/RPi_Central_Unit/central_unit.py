@@ -5,6 +5,9 @@ from tkinter import *
 import tkinter.font
 import RPi.GPIO
 RPi.GPIO.setmode(RPi.GPIO.BCM)
+# import for MQTT:
+import paho.mqtt.publish as publish
+
 
 ## my modules ##
 from cu_i2c import *
@@ -13,6 +16,10 @@ from cu_i2c import *
 slaveAddress = 17
 packetLength = 22
 offset = 0
+
+## MQTT DEFINITONS ##
+host = "test.mosquitto.org"
+topic = "tituszdipterv/test"
 
 ## GUI DEFINITIONS ##
 window = Tk()
@@ -43,16 +50,23 @@ def I2C_GetDataFunction():
         block = bus.read_i2c_block_data(slaveAddress, offset, packetLength)
         #print(block)
 
-        ID = countID(block)
-        ID0 = hex(countIDWord(block[0], block[1], block[2], block[3]))
-        ID1 = hex(countIDWord(block[4], block[5], block[6], block[7]))
-        ID2 = hex(countIDWord(block[8], block[9], block[10], block[11]))
-        Temperature = countTemperature(block[17], block[18])
-        Humidity = countHumidity(block[20], block[21])
-
-        #print("ID:", ID, "\nTemperature:", Temperature, "°C", "\nHumidity:", Humidity, "%\n")
+        ID0             = hex(getID0(block))
+        ID1             = hex(getID1(block))
+        ID2             = hex(getID2(block))
+        PackageID       = getPackageID(block)
+        TemperatureID   = getTemperatureID(block)
+        Temperature     = getTemperature(block)
+        HumidityID      = getHumidityID(block)
+        Humidity        = getHumidity(block)
 
         fillTextbox(ID0, ID1, ID2, Temperature, Humidity)
+        data = (ID0+","+ID1+","+ID2+","+str(PackageID)+","+str(TemperatureID)+","+str(Temperature)+","+str(HumidityID)+","+str(Humidity))
+        
+        #publishing data via MQTT
+        #topic, payload, hostname
+        publish.single(topic, data, hostname=host)
+        print("Data published.\n")
+        
 
 def fillTextbox(id0, id1, id2, temperature, humidity):
     IDOutput.delete(0.0, END)
