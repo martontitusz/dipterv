@@ -52,8 +52,6 @@ void SensorsGetData(void)
 
 void SensorsTaskFunction(void const * argument)
 {
-	osDelay(3000);
-
 	pTemperature	= TemperatureBuffer;
 	pHumidity		= HumidityBuffer;
 
