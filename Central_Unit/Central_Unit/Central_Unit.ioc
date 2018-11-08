@@ -2,7 +2,7 @@
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK,configTOTAL_HEAP_SIZE,Queues01
 FREERTOS.Queues01=RadioPacketQueue,5,uint32_t,0,Dynamic,NULL,NULL
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LedTask,-2,128,LedTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RadioTask,1,512,RadioTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RaspberryPiTask,2,512,RaspberryPiTaskFunction,As weak,NULL,Dynamic,NULL,NULL
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LedTask,-2,128,LedTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RadioTask,1,512,RadioTaskFunction,As weak,NULL,Dynamic,NULL,NULL;RaspberryPiTask,2,512,RaspberryPiTaskFunction,As weak,NULL,Dynamic,NULL,NULL;GPIOTask,1,128,GPIOTaskFunction,As weak,NULL,Dynamic,NULL,NULL
 FREERTOS.configTOTAL_HEAP_SIZE=65536
 File.Version=6
 I2C1.GeneralCallMode=I2C_GENERALCALL_ENABLE
@@ -149,7 +149,7 @@ PB2.Signal=GPIO_Input
 PB4.GPIOParameters=GPIO_Label
 PB4.GPIO_Label=RPI_GPIO1
 PB4.Locked=true
-PB4.Signal=GPIO_Input
+PB4.Signal=GPIO_Output
 PB5.GPIOParameters=GPIO_Label
 PB5.GPIO_Label=RPI_GPIO0
 PB5.Locked=true

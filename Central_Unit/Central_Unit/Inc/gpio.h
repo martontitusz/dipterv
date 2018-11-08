@@ -59,6 +59,8 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+#include "cmsis_os.h"
+#include "stdbool.h"
 
 /* USER CODE END Includes */
 
@@ -69,7 +71,7 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void GPIOTaskFunction(void const * argument);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

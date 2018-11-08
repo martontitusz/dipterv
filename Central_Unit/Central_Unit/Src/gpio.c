@@ -57,7 +57,7 @@
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-
+extern bool isI2CBusy;
 /* USER CODE END 1 */
 
 /** Configure pins as 
@@ -83,7 +83,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, LED0_Pin|LED1_Pin|LORA_SPI_NSS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DISPLAY_TOUCH_IRQ_Pin|DISPLAY_SPI_NSS_TOUCH_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, DISPLAY_TOUCH_IRQ_Pin|DISPLAY_SPI_NSS_TOUCH_Pin|RPI_GPIO1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, DISPLAY_SPI_NSS_LCD_Pin|DISPLAY_RESET_Pin|DISPLAY_DC_Pin, GPIO_PIN_RESET);
@@ -107,16 +107,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PBPin PBPin PBPin PBPin 
-                           PBPin */
-  GPIO_InitStruct.Pin = LORA_DIO3_Pin|LORA_DIO4_Pin|LORA_DIO5_Pin|RPI_GPIO1_Pin 
-                          |RPI_GPIO0_Pin;
+  /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
+  GPIO_InitStruct.Pin = LORA_DIO3_Pin|LORA_DIO4_Pin|LORA_DIO5_Pin|RPI_GPIO0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PBPin PBPin */
-  GPIO_InitStruct.Pin = DISPLAY_TOUCH_IRQ_Pin|DISPLAY_SPI_NSS_TOUCH_Pin;
+  /*Configure GPIO pins : PBPin PBPin PBPin */
+  GPIO_InitStruct.Pin = DISPLAY_TOUCH_IRQ_Pin|DISPLAY_SPI_NSS_TOUCH_Pin|RPI_GPIO1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -144,6 +142,24 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+
+void GPIOTaskFunction(void const * argument)
+{
+	HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, GPIO_PIN_RESET);
+
+	for(;;)
+	{
+		if (isI2CBusy)
+		{
+			HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, GPIO_PIN_SET);
+		}
+		else
+		{
+			HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, GPIO_PIN_RESET);
+		}
+		osDelay(10);
+	}
+}
 
 /* USER CODE END 2 */
 

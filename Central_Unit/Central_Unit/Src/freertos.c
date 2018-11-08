@@ -82,6 +82,7 @@ osThreadId defaultTaskHandle;
 osThreadId LedTaskHandle;
 osThreadId RadioTaskHandle;
 osThreadId RaspberryPiTaskHandle;
+osThreadId GPIOTaskHandle;
 osMessageQId RadioPacketQueueHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +94,7 @@ void StartDefaultTask(void const * argument);
 void LedTaskFunction(void const * argument);
 void RadioTaskFunction(void const * argument);
 void RaspberryPiTaskFunction(void const * argument);
+void GPIOTaskFunction(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -134,6 +136,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of RaspberryPiTask */
   osThreadDef(RaspberryPiTask, RaspberryPiTaskFunction, osPriorityHigh, 0, 512);
   RaspberryPiTaskHandle = osThreadCreate(osThread(RaspberryPiTask), NULL);
+
+  /* definition and creation of GPIOTask */
+  osThreadDef(GPIOTask, GPIOTaskFunction, osPriorityAboveNormal, 0, 128);
+  GPIOTaskHandle = osThreadCreate(osThread(GPIOTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -221,6 +227,24 @@ __weak void RaspberryPiTaskFunction(void const * argument)
     osDelay(1);
   }
   /* USER CODE END RaspberryPiTaskFunction */
+}
+
+/* USER CODE BEGIN Header_GPIOTaskFunction */
+/**
+* @brief Function implementing the GPIOTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GPIOTaskFunction */
+__weak void GPIOTaskFunction(void const * argument)
+{
+  /* USER CODE BEGIN GPIOTaskFunction */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END GPIOTaskFunction */
 }
 
 /* Private application code --------------------------------------------------*/
