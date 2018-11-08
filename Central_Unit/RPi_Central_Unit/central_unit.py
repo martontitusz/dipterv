@@ -3,8 +3,8 @@ from smbus2 import *
 # import for GUI:
 from tkinter import *
 import tkinter.font
-import RPi.GPIO
-RPi.GPIO.setmode(RPi.GPIO.BCM)
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
 # import for MQTT:
 import paho.mqtt.publish as publish
 
@@ -20,6 +20,10 @@ offset = 0
 ## MQTT DEFINITONS ##
 host = "test.mosquitto.org"
 topic = "tituszdipterv/test"
+
+## GPIO DEFINITIONS ##
+GPIO_I2CBUSY_PIN = 18   # BOARD numbering
+GPIO.setup(GPIO_I2CBUSY_PIN, GPIO.IN)
 
 ## GUI DEFINITIONS ##
 window = Tk()
@@ -85,7 +89,14 @@ def fillTextbox(id0, id1, id2, temperature, humidity):
     HumOutput.insert(END, "%")
 
 def closeFunction():
+    GPIO.cleanup()
     window.destroy()
+
+def gpioEventCallbackFunction(input_int):
+    I2C_GetDataFunction()
+
+GPIO.add_event_detect(GPIO_I2CBUSY_PIN, GPIO.RISING)
+GPIO.add_event_callback(GPIO_I2CBUSY_PIN, gpioEventCallbackFunction)
 
 ## WIDGETS ##
 I2CButton = Button(window, text = 'Get Data', font = myFont, command = I2C_GetDataFunction, bg = 'bisque2', height = 1, width = 14)
