@@ -10,6 +10,7 @@
 extern osMessageQId TemperatureQueueHandle;
 extern osMessageQId HumidityQueueHandle;
 
+extern radioState_t RadioState;
 uint8_t TemperatureBuffer[2];
 uint8_t HumidityBuffer[2];
 
@@ -58,6 +59,7 @@ void SensorsTaskFunction(void const * argument)
 	for(;;)
 	{
 		SensorsGetData();
-		osDelay(1000);
+		RadioState = PacketBuilding;
+		osDelay(10000);
 	}
 }

@@ -73,7 +73,7 @@ uint8_t TemperatureBuffer[2];
 uint8_t HumidityBuffer[2];
 bool dataAvailable = false;
 
-
+radioState_t RadioState = PacketBuilding;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -219,6 +219,38 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	switch (GPIO_Pin)
+	{
+		case LORA_DIO0_Pin:
+		{
+			/* TxDone or RxDone */
+			if (RadioState == Tx)
+			{
+				/* TxDone -> waiting for ACK */
+				RadioState = Rx;
+			}
+			else if(RadioState == Rx)
+			{
+				/* RxDone, if message is ACK -> go to sleep */
+				RadioState = PacketReceived;
+			}
+			break;
+		}
+		case LORA_DIO1_Pin:
+		{
+			/* RxTimeout -> Retransmit*/
+			RadioState = Tx;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+}
+
 
 /* USER CODE END 4 */
 

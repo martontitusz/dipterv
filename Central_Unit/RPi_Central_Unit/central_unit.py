@@ -22,7 +22,7 @@ host = "test.mosquitto.org"
 topic = "tituszdipterv/test"
 
 ## GPIO DEFINITIONS ##
-GPIO_I2CBUSY_PIN = 18   # BOARD numbering
+GPIO_I2CBUSY_PIN = 18
 GPIO.setup(GPIO_I2CBUSY_PIN, GPIO.IN)
 
 ## GUI DEFINITIONS ##

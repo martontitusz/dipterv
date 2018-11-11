@@ -18,6 +18,10 @@
 #define RADIO_BUFFER_LENGTH			46
 #define RADIO_TEMPERATUREDATA_ID	1
 #define RADIO_HUMIDITYDATA_ID		2
+#define RADIO_ACK_MESSAGE_LENGTH	1	/* 1 byte */
+#define RADIO_ACK_MESSAGE			0x55
+#define RADIO_MAX_RETRANSMISSONS	10
+#define RADIO_ACK_RETRANSMISSIONS	10
 
 union
 {
@@ -49,9 +53,11 @@ union radiopacket_union_t
 
 /* Function prototypes */
 void RadioInitLoraModule(void);
-void RadioConfigLoraModule(void);
+void RadioConfigLoraModule(uint8_t channel);
+uint8_t RadioChangeChannel(uint8_t old_channel);
 void RadioTransmitPacket(uint8_t* message_buffer, int message_length);
 uint8_t RadioReceivePacket(void);
+void RadioTransmitAck(void);
 
 void RadioTaskFunction(void const * argument);
 

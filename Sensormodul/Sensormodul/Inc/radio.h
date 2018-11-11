@@ -17,6 +17,11 @@
 #define RADIO_PACKET_LENGTH			22	/* 22 bytes */
 #define RADIO_TEMPERATUREDATA_ID	1	/* 1 byte */
 #define RADIO_HUMIDITYDATA_ID		2	/* 2 byte */
+#define RADIO_ACK_MESSAGE_LENGTH	1	/* 1 byte */
+#define RADIO_ACK_MESSAGE			0x55
+#define RADIO_MAX_RETRANSMISSONS	10
+#define RADIO_RX_TIMEOUT			2000
+#define RADIO_TX_TIMEOUT			2000
 
 /* Variables */
 union {
@@ -31,12 +36,12 @@ union {
 
 struct radiopacket_t
 {
-	uint32_t deviceId[3];
-	uint32_t packetId;
-	uint8_t temperatuteId;
-	uint8_t temperature[2];
-	uint8_t humidityId;
-	uint8_t humidity[2];
+	uint32_t	deviceId[3];
+	uint32_t	packetId;
+	uint8_t		temperatuteId;
+	uint8_t		temperature[2];
+	uint8_t		humidityId;
+	uint8_t		humidity[2];
 };
 
 union {
@@ -47,8 +52,8 @@ union {
 /* Function prototypes */
 void RadioInitLoraModule(void);
 void RadioConfigLoraModule(void);
-void RadioTransmitPacket(uint8_t* message_buffer, int message_length);
-uint8_t RadioReceivePacket(uint8_t* message_buffer);
+void RadioTransmitSinglePacket(uint8_t* message_buffer, int message_length);
+uint8_t RadioReceivePacket(void);
 void RadioPacketBuilder(void);
 void GetUniqueId(void);
 void RadioFillDeviceId(void);
@@ -58,6 +63,18 @@ void RadioFillIds(void);
 void RadioFillTemperatureData(void);
 void RadioFillHumidityData(void);
 void RadioIncreasePacketId(void);
+
+/* StateMachine Functions: */
+void RadioStateMachineFunction(void);
+void RadioPacketBuildingStateFunction(void);
+void RadioTxStateFunction(void);
+void RadioRxStateFunction(void);
+void RadioPacketReceivedStateFunction(void);
+void RadioStandbyStateFunction(void);
+void RadioSleepStateFunction(void);
+
+/***************************/
+
 
 void RadioTaskFunction(void const * argument);
 

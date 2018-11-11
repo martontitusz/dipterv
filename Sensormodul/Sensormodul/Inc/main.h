@@ -61,6 +61,7 @@
 
 #define LORA_DIO0_Pin GPIO_PIN_3
 #define LORA_DIO0_GPIO_Port GPIOA
+#define LORA_DIO0_EXTI_IRQn EXTI3_IRQn
 #define LORA_SPI_NSS_Pin GPIO_PIN_4
 #define LORA_SPI_NSS_GPIO_Port GPIOA
 #define LORA_SPI_SCK_Pin GPIO_PIN_5
@@ -71,6 +72,7 @@
 #define LORA_SPI_MOSI_GPIO_Port GPIOA
 #define LORA_DIO1_Pin GPIO_PIN_4
 #define LORA_DIO1_GPIO_Port GPIOC
+#define LORA_DIO1_EXTI_IRQn EXTI4_IRQn
 #define LORA_DIO2_Pin GPIO_PIN_5
 #define LORA_DIO2_GPIO_Port GPIOC
 #define LORA_DIO3_Pin GPIO_PIN_0
@@ -91,10 +93,9 @@
 #define USER_GPIO1_GPIO_Port GPIOA
 #define USER_GPIO0_Pin GPIO_PIN_11
 #define USER_GPIO0_GPIO_Port GPIOA
-#define USER_BTN_Pin GPIO_PIN_4
-#define USER_BTN_GPIO_Port GPIOB
 #define HDC2010_INT_Pin GPIO_PIN_5
 #define HDC2010_INT_GPIO_Port GPIOB
+#define HDC2010_INT_EXTI_IRQn EXTI9_5_IRQn
 #define HDC2010_I2C_SCL_Pin GPIO_PIN_6
 #define HDC2010_I2C_SCL_GPIO_Port GPIOB
 #define HDC2010_I2C_SDA_Pin GPIO_PIN_7
@@ -108,6 +109,15 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+typedef enum StateEnum
+{
+	PacketBuilding,
+	Tx,
+	Rx,
+	PacketReceived,
+	Standby,
+	Sleep
+} radioState_t;
 
 /* USER CODE END Private defines */
 

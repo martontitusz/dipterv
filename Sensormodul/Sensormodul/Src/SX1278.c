@@ -195,7 +195,7 @@ int SX1278_LoRaEntryRx(SX1278_t * module, uint8_t length, uint32_t timeout) {
 	SX1278_SPIWrite(module, REG_LR_PADAC, 0x84);	//Normal and RX
 	SX1278_SPIWrite(module, LR_RegHopPeriod, 0xFF);	//No FHSS
 	SX1278_SPIWrite(module, REG_LR_DIOMAPPING1, 0x01);//DIO=00,DIO1=00,DIO2=00, DIO3=01
-	SX1278_SPIWrite(module, LR_RegIrqFlagsMask, 0x3F);//Open RxDone interrupt & Timeout
+	SX1278_SPIWrite(module, LR_RegIrqFlagsMask, 0xFF);// KMT 0x3F);//Open RxDone interrupt & Timeout
 	SX1278_clearLoRaIrq(module);
 	SX1278_SPIWrite(module, LR_RegPayloadLength, length);//Payload Length 21byte(this register must difine when the data long of one byte in SF is 6)
 	addr = SX1278_SPIRead(module, LR_RegFifoRxBaseAddr); //Read RxBaseAddr
