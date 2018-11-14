@@ -52,6 +52,7 @@
 #include "cmsis_os.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
@@ -124,6 +125,7 @@ int main(void)
   MX_I2C2_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -221,36 +223,24 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	switch (GPIO_Pin)
+	if (GPIO_Pin == LORA_DIO0_Pin)
 	{
-		case LORA_DIO0_Pin:
+		/* TxDone or RxDone */
+		if (RadioState == Tx)
 		{
-			/* TxDone or RxDone */
-			if (RadioState == Tx)
-			{
-				/* TxDone -> waiting for ACK */
-				RadioState = Rx;
-			}
-			else if(RadioState == Rx)
-			{
-				/* RxDone, if message is ACK -> go to sleep */
-				RadioState = PacketReceived;
-			}
-			break;
+			/* TxDone -> waiting for ACK */
+			RadioState = Rx;
+			HAL_TIM_Base_Start_IT(&htim3);
 		}
-		case LORA_DIO1_Pin:
+		else if(RadioState == Rx)
 		{
-			/* RxTimeout -> Retransmit*/
-			RadioState = Tx;
-			break;
+			/* RxDone, if message is ACK -> go to sleep */
+			RadioState = PacketReceived;
+			HAL_TIM_Base_Stop_IT(&htim3);
 		}
-		default:
-		{
-			break;
-		}
+		else {}
 	}
 }
-
 
 /* USER CODE END 4 */
 
@@ -272,6 +262,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
 
+  if (htim->Instance == TIM3)
+  {
+	  HAL_TIM_Base_Stop_IT(&htim3);
+	  RadioState = Tx;
+  }
   /* USER CODE END Callback 1 */
 }
 

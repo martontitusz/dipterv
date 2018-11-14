@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "cmsis_os.h"
 
 #define SX1278_MAX_PACKET	256
 #define SX1278_DEFAULT_TIMEOUT		3000
@@ -286,7 +287,7 @@ void SX1278_begin(SX1278_t * module, uint8_t frequency, uint8_t power,
 
 int SX1278_transmit(SX1278_t * module, uint8_t *txBuf, uint8_t length,
 		uint32_t timeout);
-int SX1278_(SX1278_t * module, uint8_t length, uint32_t timeoutT);
+int SX1278_receive(SX1278_t * module, uint8_t length, uint32_t timeout);
 uint8_t SX1278_available(SX1278_t * module);
 uint8_t SX1278_read(SX1278_t * module, uint8_t *rxBuf, uint8_t length);
 

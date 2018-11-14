@@ -10,8 +10,8 @@
 SX1278_hw_t	SX1278_hw;
 SX1278_t	SX1278;
 
-uint8_t CurrentChannel	= SX1278_LORA_BW_15_6KHZ;
-uint8_t TxBuffer[5];
+uint8_t CurrentChannel = SX1278_LORA_BW_15_6KHZ;
+uint8_t TxBuffer[5] = {RADIO_ACK_MESSAGE, RADIO_ACK_MESSAGE, RADIO_ACK_MESSAGE, RADIO_ACK_MESSAGE, RADIO_ACK_MESSAGE};
 
 struct radiopacket_t		*pRadioRxPacket;
 extern SPI_HandleTypeDef	hspi1;
@@ -35,7 +35,9 @@ void RadioConfigLoraModule(uint8_t channel)
 {
 	//SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, SX1278_LORA_BW_15_6KHZ/*SX1278_LORA_BW_20_8KHZ*/, 10);
 	SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, channel, 10);
-	SX1278_LoRaEntryRx(&SX1278, RADIO_PACKET_LENGTH, 2000);
+	//SX1278_LoRaEntryRx(&SX1278, RADIO_PACKET_LENGTH, 2000);
+	SX1278_LoRaEntryTx(&SX1278, RADIO_ACK_MESSAGE_LENGTH, 2000);
+
 }
 
 uint8_t RadioChangeChannel(uint8_t old_channel)
@@ -80,7 +82,7 @@ uint8_t RadioReceivePacket(void)
 
 void RadioTransmitAck(void)
 {
-	SX1278_LoRaEntryTx(&SX1278, RADIO_ACK_MESSAGE_LENGTH, 2000);
+	//SX1278_LoRaEntryTx(&SX1278, RADIO_ACK_MESSAGE_LENGTH, 2000);
 
 	for (int i = 0; i < /*RADIO_ACK_RETRANSMISSIONS*/1; i++)
 	{
@@ -88,13 +90,13 @@ void RadioTransmitAck(void)
 		//osDelay(1);
 	}
 
-	SX1278_LoRaEntryRx(&SX1278, RADIO_PACKET_LENGTH, 2000);
+	//SX1278_LoRaEntryRx(&SX1278, RADIO_PACKET_LENGTH, 2000);
 }
 
 /* RadioTaskFunction function */
 void RadioTaskFunction(void const * argument)
 {
-	TxBuffer[0] = RADIO_ACK_MESSAGE;
+	//TxBuffer[0] = RADIO_ACK_MESSAGE;
 	RadioInitLoraModule();
 	RadioConfigLoraModule(CurrentChannel);
 	//RadioConfigLoraModule(SX1278_LORA_BW_20_8KHZ);
@@ -103,7 +105,8 @@ void RadioTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		RadioReceivePacket();
+		//RadioReceivePacket();
+		RadioTransmitAck();
 		//CurrentChannel = RadioChangeChannel(CurrentChannel);
 		//RadioConfigLoraModule(CurrentChannel);
 

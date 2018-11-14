@@ -14,9 +14,9 @@ uint8_t		*pRxTemperature;
 uint8_t		*pRxHumidity;
 
 uint8_t		RxBuffer[5];
-uint8_t		RetransmitCounter = 0;
-bool		RadioInRxMode = false;
-bool		RadioInSleepMode = false;
+uint8_t		RetransmitCounter	= 0;
+bool		RadioInRxMode		= false;
+bool		RadioInSleepMode	= false;
 
 extern osMessageQId			TemperatureQueueHandle;
 extern osMessageQId			HumidityQueueHandle;
@@ -38,7 +38,7 @@ void RadioInitLoraModule(void)
 
 void RadioConfigLoraModule(void)
 {
-	SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, SX1278_LORA_BW_15_6KHZ/*SX1278_LORA_BW_20_8KHZ*/, 10);
+	SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, RADIO_BANDWIDTH, 10);
 	SX1278_LoRaEntryTx(&SX1278, 16, RADIO_TX_TIMEOUT);
 }
 
@@ -192,7 +192,7 @@ void RadioTxStateFunction(void)
 	else
 	{
 		RetransmitCounter++;
-		RadioTransmitSinglePacket(RadioPacket.bytes, RADIO_PACKET_LENGTH);
+		SX1278_transmit(&SX1278, RadioPacket.bytes, RADIO_PACKET_LENGTH, RADIO_TX_TIMEOUT);
 	}
 }
 
@@ -200,7 +200,7 @@ void RadioRxStateFunction(void)
 {
 	if (!RadioInRxMode)
 	{
-		SX1278_LoRaEntryRx(&SX1278, RADIO_ACK_MESSAGE_LENGTH, RADIO_RX_TIMEOUT);
+		SX1278_receive(&SX1278, RADIO_ACK_MESSAGE_LENGTH, RADIO_RX_TIMEOUT);
 		RadioInRxMode = true;
 	}
 	else {}
@@ -245,17 +245,45 @@ void RadioTaskFunction(void const * argument)
 	RadioFillIds();
 
 	RadioInitLoraModule();
-	RadioConfigLoraModule();
+	SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, RADIO_BANDWIDTH, 10);
 
-	RadioState = PacketBuilding;
-
-	osDelay(500);
+	RadioState = Sleep;
 
 	for(;;)
 	{
+//	FOR TEST AND DEBUG:
+//		switch (RadioState)
+//		{
+//			case Tx:
+//			{
+//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_SET);
+//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
+//				break;
+//			}
+//			case Rx:
+//			{
+//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_SET);
+//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
+//				break;
+//			}
+//			case Sleep:
+//			{
+//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_SET);
+//				break;
+//			}
+//			default:
+//			{
+//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
+//				break;
+//			}
+//		}
 		RadioStateMachineFunction();
-		//RadioPacketBuilder();
-		//RadioTransmitAndWaitForAck(RadioPacket.bytes, RADIO_PACKET_LENGTH, RADIO_MAX_RETRANSMISSONS);
 
 		osDelay(10);
 	}
