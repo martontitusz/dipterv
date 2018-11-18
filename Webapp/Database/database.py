@@ -1,5 +1,6 @@
 import sqlite3
 from Database.sensordata import *
+#from sensordata import *
 
 sensorId1 = ["0x42003c", "0x5246500e", "0x20383352"]
 sensorId2 = ["0x4a002e", "0x5246500e", "0x20383352"]
@@ -43,20 +44,83 @@ def getAllFromDatabase():
     c = conn.cursor()
     with conn:
         c.execute("SELECT * FROM sensors")
-    return c.fetchall()
+        return c.fetchall()
+
+def getDeviceId0FromDatabase():
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT deviceId0 FROM sensors")
+        return c.fetchall()
+
+def getDeviceId1FromDatabase():
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT deviceId1 FROM sensors")
+        return c.fetchall()
+
+def getDeviceId2FromDatabase():
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT deviceId2 FROM sensors")
+        return c.fetchall()
+
+def getIdFromDatabase():
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT ID FROM sensors")
+        return c.fetchall()
+
+def getIdByDeviceId(devId0, devId1, devId2):
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT ID FROM sensors WHERE deviceId0=:deviceId0 AND deviceId1=:deviceId1 AND deviceId2=:deviceId2",{'deviceId0': devId0,'deviceId1': devId1,'deviceId2': devId2})
+        return c.fetchall()
 
 def getTemperatureFromDatabase():
     conn = sqlite3.connect('sensor.db')
     c = conn.cursor()
     with conn:
-        c.execute("SELECT ID, temperature  FROM sensors")
+        c.execute("SELECT temperature FROM sensors")
+        return c.fetchall()
+
+def getTemperatureByDeviceId(devId0, devId1, devId2):
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT temperature FROM sensors WHERE deviceId0=:deviceId0 AND deviceId1=:deviceId1 AND deviceId2=:deviceId2",{'deviceId0': devId0,'deviceId1': devId1,'deviceId2': devId2})
         return c.fetchall()
 
 def getHumidityFromDatabase():
     conn = sqlite3.connect('sensor.db')
     c = conn.cursor()
     with conn:
-        c.execute("SELECT ID, humidity FROM sensors")
+        c.execute("SELECT humidity FROM sensors")
+        return c.fetchall()
+
+def getHumidityByDeviceId(devId0, devId1, devId2):
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT humidity FROM sensors WHERE deviceId0=:deviceId0 AND deviceId1=:deviceId1 AND deviceId2=:deviceId2",{'deviceId0': devId0,'deviceId1': devId1,'deviceId2': devId2})
+        return c.fetchall()
+
+def getPacketIdFromDatabase():
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT packetId FROM sensors")
+        return c.fetchall()
+
+def getPacketIdByDeviceId(devId0, devId1, devId2):
+    conn = sqlite3.connect('sensor.db')
+    c = conn.cursor()
+    with conn:
+        c.execute("SELECT packetId FROM sensors WHERE deviceId0=:deviceId0 AND deviceId1=:deviceId1 AND deviceId2=:deviceId2",{'deviceId0': devId0,'deviceId1': devId1,'deviceId2': devId2})
         return c.fetchall()
 
 def getDataByDeviceId(devId0, devId1, devId2):
@@ -71,6 +135,3 @@ def droptable():
     c = conn.cursor()
     with conn:
         c.execute("""DROP TABLE sensors""")
-
-# droptable()
-# createTable()

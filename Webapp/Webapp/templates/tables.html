@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class='tablescontainer' align='center'>
+        <div class='tables' align='center'>
+            <div class='table_title' align='center'>
+                {{table1_title|safe}}
+            </div>
+            {{table_data1|safe}}
+        </div>
+        <div class='tables' align='center'>
+            <div class='table_title' align='center'>
+                {{table2_title|safe}}
+            </div>
+            {{table_data2|safe}}
+        </div>
+        <div class='tablefoot'>
+            {{table_foot|safe}}
+        </div>
+        <div class='tables' align='center'>
+            {{summary_table_data1|safe}}
+        </div>
+        <div class='tables' align='center'>
+            {{summary_table_data2|safe}}
+        </div>
+    </div>
+{% endblock content %}
