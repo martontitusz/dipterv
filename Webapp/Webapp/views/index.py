@@ -4,9 +4,10 @@ from Database.database import *
 
 bp = Blueprint(__name__, __name__, template_folder='templates')
 
-pagecounter = 0
-currentpage = 0
-rowperpage  = 10
+tablepagecounter    = 0
+graphpagecounter    = 0
+rowperpage          = 10
+graphdataperpage    = 10
 
 
 def showtables(page):
@@ -14,7 +15,7 @@ def showtables(page):
         sensor1 = getDataByDeviceId(sensorId1[0], sensorId1[1], sensorId1[2])
         sensor2 = getDataByDeviceId(sensorId2[0], sensorId2[1], sensorId2[2])
 
-        pagecounter = int((max(len(sensor1), len(sensor2))-1)/rowperpage)+1
+        tablepagecounter = int((max(len(sensor1), len(sensor2))-1)/rowperpage)+1
 
         temp1	= []
         temp2   = []
@@ -56,10 +57,10 @@ def showtables(page):
         table_foot_first    = """<a class="active" href="/tables1">1</a>"""
         
         table_foot_middle   = ""
-        for i in range(1, pagecounter):
+        for i in range(1, tablepagecounter):
             table_foot_middle = table_foot_middle + """<a href="/tables""" + str(i+1) + """">""" + str(i+1) + """</a>"""
 
-        table_foot_next     = """<a href="/tables""" + str(min(page+1, pagecounter)) + """">&raquo;</a>"""
+        table_foot_next     = """<a href="/tables""" + str(min(page+1, tablepagecounter)) + """">&raquo;</a>"""
         table_foot_stop     = """</td></tr></tfoot></table>"""
 
         table_foot          = table_foot_start + table_foot_prew + table_foot_first + table_foot_middle + table_foot_next + table_foot_stop
@@ -111,12 +112,12 @@ def showtables4():
     return showtables(4)
 
 
-@bp.route('/graphs')
-def showgraphs():
+def showgraphs(page):
     try:
         sensor1 = getDataByDeviceId(sensorId1[0], sensorId1[1], sensorId1[2])
         sensor2 = getDataByDeviceId(sensorId2[0], sensorId2[1], sensorId2[2])
 
+        graphpagecounter = int((max(len(sensor1), len(sensor2))-1)/graphdataperpage)+1
 
         temp1	= []
         temp2	= []
@@ -135,19 +136,22 @@ def showgraphs():
             temp2.append(i[6])
             hum2.append(i[8])
 
+        start   = (page - 1) * graphdataperpage
+        stop    = (page * graphdataperpage)
+
         temperature_line_chart = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
         temperature_line_chart.title    = 'Temperature [°C]'
-        temperature_line_chart.x_labels = map(str, range(0, max(max(pId1),max(pId2))))
-        temperature_line_chart.add('Sensor1',   temp1)
-        temperature_line_chart.add('Sensor2',   temp2)
+        temperature_line_chart.x_labels = map(str, range(start, stop))
+        temperature_line_chart.add('Sensor1',   temp1[start:stop])
+        temperature_line_chart.add('Sensor2',   temp2[start:stop])
         temperature_line_chart.range = [min(min(temp1),min(temp2))-5, max(max(temp1),max(temp2))+5]
         temperature_graph_data = temperature_line_chart.render_data_uri()
 
         humidity_line_chart = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
         humidity_line_chart.title       = 'Humidity [%]'
-        humidity_line_chart.x_labels    = map(str, range(0, max(max(pId1),max(pId2))))
-        humidity_line_chart.add('Sensor1', hum1)
-        humidity_line_chart.add('Sensor2', hum2)
+        humidity_line_chart.x_labels    = map(str, range(start, stop))
+        humidity_line_chart.add('Sensor1', hum1[start:stop])
+        humidity_line_chart.add('Sensor2', hum2[start:stop])
         humidity_line_chart.range = [0, 100]
         humidity_graph_data = humidity_line_chart.render_data_uri()
 
@@ -199,13 +203,45 @@ def showgraphs():
         maxhumidity2.add('Max Humidity', [{'value': max(hum2), 'max_value': 100, 'color': 'blue'}])
         maxhumidity2_data               = maxhumidity2.render_data_uri()
 
+        graph_foot_start    = """<table><tfoot><tr><td colspan="3">"""
+        graph_foot_prew     = """<div class="links"><a href="/graphs""" + str(max(page-1, 1)) + """">&laquo;</a>"""
+        graph_foot_first    = """<a class="active" href="/graphs1">1</a>"""
+        
+        graph_foot_middle   = ""
+        for i in range(1, graphpagecounter):
+            graph_foot_middle = graph_foot_middle + """<a href="/graphs""" + str(i+1) + """">""" + str(i+1) + """</a>"""
+
+        graph_foot_next     = """<a href="/graphs""" + str(min(page+1, graphpagecounter)) + """">&raquo;</a>"""
+        graph_foot_stop     = """</td></tr></tfoot></table>"""
+
+        graph_foot          = graph_foot_start + graph_foot_prew + graph_foot_first + graph_foot_middle + graph_foot_next + graph_foot_stop
+
+
+
         return render_template("graphs.html",
             temperature_graph_data  = temperature_graph_data,
             humidity_graph_data     = humidity_graph_data,
             maxtemperature1_data    = maxtemperature1_data,
             maxtemperature2_data    = maxtemperature2_data,
             maxhumidity1_data       = maxhumidity1_data,
-            maxhumidity2_data       = maxhumidity2_data
+            maxhumidity2_data       = maxhumidity2_data,
+            graph_foot              = graph_foot
             )
     except Exception as e:
         return(str(e))
+
+@bp.route('/graphs1')
+def showgraphs1():
+    return showgraphs(1)
+
+@bp.route('/graphs2')
+def showgraphs2():
+    return showgraphs(2)
+
+@bp.route('/graphs3')
+def showgraphs3():
+    return showgraphs(3)
+
+@bp.route('/graphs4')
+def showgraphs4():
+    return showgraphs(4)
