@@ -13,6 +13,7 @@ def createTable():
         c.execute("""CREATE TABLE IF NOT EXISTS sensors
         (
             ID              integer PRIMARY KEY AUTOINCREMENT,
+            timestamp       text,
             deviceId0       integer,
             deviceId1       integer,
             deviceId2       integer,
@@ -27,9 +28,10 @@ def createTable():
 #     conn = sqlite3.connect('sensor.db')
 #     c = conn.cursor()
 #     with conn:
-#         c.execute("""INSERT INTO sensors (deviceId0, deviceId1, deviceId2, packetId, temperatureId, temperature, humidityId, humidity)
-#             VALUES (:deviceId0, :deviceId1, :deviceId2, :packetId, :temperatureId, :temperature, :humidityId, :humidity)""", 
-#             {   'deviceId0'     : data.deviceId0,
+#         c.execute("""INSERT INTO sensors (timestamp, deviceId0, deviceId1, deviceId2, packetId, temperatureId, temperature, humidityId, humidity)
+#             VALUES (:timestamp, :deviceId0, :deviceId1, :deviceId2, :packetId, :temperatureId, :temperature, :humidityId, :humidity)""", 
+#             {   'timestamp'     : data.timestamp,
+#                 'deviceId0'     : data.deviceId0,
 #                 'deviceId1'     : data.deviceId1,
 #                 'deviceId2'     : data.deviceId2,
 #                 'packetId'      : data.packetId,
@@ -135,3 +137,5 @@ def droptable():
     c = conn.cursor()
     with conn:
         c.execute("""DROP TABLE sensors""")
+
+createTable()

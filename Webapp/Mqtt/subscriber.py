@@ -8,13 +8,14 @@ _bind_address   = ""
 _topic          = "tituszdipterv/test"
 
 
-def insertIntoDatabase(_deviceId0, _deviceId1, _deviceId2, _packetId, _temperatureId, _temperature, _humidityId, _humidity):
+def insertIntoDatabase(_timestamp, _deviceId0, _deviceId1, _deviceId2, _packetId, _temperatureId, _temperature, _humidityId, _humidity):
     conn = sqlite3.connect('sensor.db')
     c = conn.cursor()
     with conn:
-        c.execute("""INSERT INTO sensors (deviceId0, deviceId1, deviceId2, packetId, temperatureId, temperature, humidityId, humidity)
-            VALUES (:deviceId0, :deviceId1, :deviceId2, :packetId, :temperatureId, :temperature, :humidityId, :humidity)""", 
-            {   'deviceId0'     : _deviceId0,
+        c.execute("""INSERT INTO sensors (timestamp, deviceId0, deviceId1, deviceId2, packetId, temperatureId, temperature, humidityId, humidity)
+            VALUES (:timestamp, :deviceId0, :deviceId1, :deviceId2, :packetId, :temperatureId, :temperature, :humidityId, :humidity)""", 
+            {   'timestamp'     : _timestamp,
+                'deviceId0'     : _deviceId0,
                 'deviceId1'     : _deviceId1,
                 'deviceId2'     : _deviceId2,
                 'packetId'      : _packetId,
@@ -39,7 +40,7 @@ def on_message(client, userdata, msg):
     splitted = str(msg.payload).split(",")
     print(splitted)
 
-    insertIntoDatabase(splitted[1], splitted[2], splitted[3], splitted[4], splitted[5], splitted[6], splitted[7], splitted[8])
+    insertIntoDatabase(splitted[1], splitted[2], splitted[3], splitted[4], splitted[5], splitted[6], splitted[7], splitted[8], splitted[9])
     print("Data inserted.")
 
 # Create an MQTT client and attach our routins to it.

@@ -9,6 +9,17 @@ graphpagecounter    = 0
 rowperpage          = 10
 graphdataperpage    = 10
 
+indexID             = 0
+indexTimestamp      = 1
+indexDeviceId0      = 2
+indexDeviceId1      = 3
+indexDeviceId2      = 4
+indexPacketId       = 5
+indexTemperatureId  = 6
+indexTemperature    = 7
+indexHumidityId     = 8
+indexHumidity       = 9
+
 
 def showtables(page):
     try:
@@ -28,14 +39,14 @@ def showtables(page):
         stop    = (page * rowperpage)
 
         for i in sensor1:
-            pId1.append(i[4])
-            temp1.append(i[6])
-            hum1.append(i[8])
+            pId1.append(i[indexPacketId])
+            temp1.append(i[indexTemperature])
+            hum1.append(i[indexHumidity])
 
         for i in sensor2:
-            pId2.append(i[4])
-            temp2.append(i[6])
-            hum2.append(i[8])
+            pId2.append(i[indexPacketId])
+            temp2.append(i[indexTemperature])
+            hum2.append(i[indexHumidity])
 
         line_chart1         = pygal.Bar()
         line_chart1.add('PacketID', pId1[start:stop])
@@ -67,18 +78,32 @@ def showtables(page):
 
 
         summary_table1      = pygal.Bar()
-        summary_table1.add('Min Temperature[°C]', min(temp1))
-        summary_table1.add('Max Temperature[°C]', max(temp1))
-        summary_table1.add('Min Humidity[%]', min(hum1))
-        summary_table1.add('Max Humidity[%]', max(hum1))
+        if (len(pId1) > 0):
+            summary_table1.add('Min Temperature[°C]', min(temp1))
+            summary_table1.add('Max Temperature[°C]', max(temp1))
+            summary_table1.add('Min Humidity[%]', min(hum1))
+            summary_table1.add('Max Humidity[%]', max(hum1))
+        else:
+            summary_table1.add('Min Temperature[°C]', None)
+            summary_table1.add('Max Temperature[°C]', None)
+            summary_table1.add('Min Humidity[%]', None)
+            summary_table1.add('Max Humidity[%]', None)
+
         summary_table1.add('Received Packets', len(pId1))
         summary_table_data1 = summary_table1.render_table()
 
         summary_table2      = pygal.Bar()
-        summary_table2.add('Min Temperature[°C]', min(temp2))
-        summary_table2.add('Max Temperature[°C]', max(temp2))
-        summary_table2.add('Min Humidity[%]', min(hum2))
-        summary_table2.add('Max Humidity[%]', max(hum2))
+        if (len(pId2) > 0):
+            summary_table2.add('Min Temperature[°C]', min(temp2))
+            summary_table2.add('Max Temperature[°C]', max(temp2))
+            summary_table2.add('Min Humidity[%]', min(hum2))
+            summary_table2.add('Max Humidity[%]', max(hum2))
+        else:
+            summary_table2.add('Min Temperature[°C]', None)
+            summary_table2.add('Max Temperature[°C]', None)
+            summary_table2.add('Min Humidity[%]', None)
+            summary_table2.add('Max Humidity[%]', None)
+
         summary_table2.add('Received Packets', len(pId2))
         summary_table_data2 = summary_table2.render_table()
 
@@ -127,27 +152,31 @@ def showgraphs(page):
         pId2 	= []
 
         for i in sensor1:
-            pId1.append(i[4])
-            temp1.append(i[6])
-            hum1.append(i[8])
+            pId1.append(i[indexPacketId])
+            temp1.append(i[indexTemperature])
+            hum1.append(i[indexHumidity])
 
         for i in sensor2:
-            pId2.append(i[4])
-            temp2.append(i[6])
-            hum2.append(i[8])
+            pId2.append(i[indexPacketId])
+            temp2.append(i[indexTemperature])
+            hum2.append(i[indexHumidity])
 
         start   = (page - 1) * graphdataperpage
         stop    = (page * graphdataperpage)
 
-        temperature_line_chart = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
+        temperature_line_chart          = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
         temperature_line_chart.title    = 'Temperature [°C]'
         temperature_line_chart.x_labels = map(str, range(start, stop))
         temperature_line_chart.add('Sensor1',   temp1[start:stop])
         temperature_line_chart.add('Sensor2',   temp2[start:stop])
-        temperature_line_chart.range = [min(min(temp1),min(temp2))-5, max(max(temp1),max(temp2))+5]
+
+        if (len(pId1) > 0) and (len(pId2) > 0):
+            temperature_line_chart.range = [min(min(temp1),min(temp2))-5, max(max(temp1),max(temp2))+5]
+        else:
+            temperature_line_chart.range = [0, 50]
         temperature_graph_data = temperature_line_chart.render_data_uri()
 
-        humidity_line_chart = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
+        humidity_line_chart             = pygal.Line(legend_at_bottom=True, style = pygal.style.styles['default'](background = 'aliceblue'))
         humidity_line_chart.title       = 'Humidity [%]'
         humidity_line_chart.x_labels    = map(str, range(start, stop))
         humidity_line_chart.add('Sensor1', hum1[start:stop])
@@ -165,7 +194,12 @@ def showgraphs(page):
                                                                                                             background          = 'aliceblue'))
         maxtemperature1.title           = "Sensor1 Max Temperature"
         maxtemperature1.value_formatter = celsius_formatter
-        maxtemperature1.add('Sensor1 Max Temperature', [{'value': max(temp1), 'max_value': 60, 'color': 'red'}])
+
+        if (len(pId1) > 0):
+            maxtemperature1.add('Sensor1 Max Temperature', [{'value': max(temp1), 'max_value': 60, 'color': 'red'}])
+        else:
+            maxtemperature1.add('Sensor1 Max Temperature', [{'value': 0, 'max_value': 60, 'color': 'red'}])
+        
         maxtemperature1_data            = maxtemperature1.render_data_uri()
 
         maxtemperature2                 = pygal.SolidGauge( inner_radius    = 0.70,
@@ -176,7 +210,10 @@ def showgraphs(page):
                                                                                                             background          = 'aliceblue'))
         maxtemperature2.title           = "Sensor2 Max Temperature"
         maxtemperature2.value_formatter = celsius_formatter
-        maxtemperature2.add('Sensor2 Max Temperature', [{'value': max(temp2), 'max_value': 60, 'color': 'blue'}])
+        if (len(pId2) > 0):
+            maxtemperature2.add('Sensor2 Max Temperature', [{'value': max(temp2), 'max_value': 60, 'color': 'blue'}])
+        else:
+            maxtemperature2.add('Sensor2 Max Temperature', [{'value': 0, 'max_value': 60, 'color': 'blue'}])
         maxtemperature2_data            = maxtemperature2.render_data_uri()
 
         ### Max Humidities ###
@@ -189,7 +226,10 @@ def showgraphs(page):
                                                                                                             background          = 'aliceblue'))
         maxhumidity1.title              = "Sensor1 Max Humidity"
         maxhumidity1.value_formatter    = percent_formatter
-        maxhumidity1.add('Max Humidity', [{'value': max(hum1), 'max_value': 100, 'color': 'red'}])
+        if (len(pId1) > 0):
+            maxhumidity1.add('Max Humidity', [{'value': max(hum1), 'max_value': 100, 'color': 'red'}])
+        else:
+            maxhumidity1.add('Max Humidity', [{'value': 0, 'max_value': 100, 'color': 'red'}])
         maxhumidity1_data               = maxhumidity1.render_data_uri()
 
         maxhumidity2                    = pygal.SolidGauge( inner_radius    = 0.70,
@@ -199,8 +239,11 @@ def showgraphs(page):
                                                                                                             tooltip_font_size   = 30,
                                                                                                             background          = 'aliceblue'))
         maxhumidity2.title              = "Sensor2 Max Humidity"
-        maxhumidity2.value_formatter    = percent_formatter        
-        maxhumidity2.add('Max Humidity', [{'value': max(hum2), 'max_value': 100, 'color': 'blue'}])
+        maxhumidity2.value_formatter    = percent_formatter
+        if (len(pId2) > 0):
+            maxhumidity2.add('Max Humidity', [{'value': max(hum2), 'max_value': 100, 'color': 'blue'}])
+        else:
+            maxhumidity2.add('Max Humidity', [{'value': 0, 'max_value': 100, 'color': 'blue'}])
         maxhumidity2_data               = maxhumidity2.render_data_uri()
 
         graph_foot_start    = """<table><tfoot><tr><td colspan="3">"""
