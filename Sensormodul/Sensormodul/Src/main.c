@@ -228,9 +228,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		/* TxDone or RxDone */
 		if (RadioState == Tx)
 		{
-			/* TxDone -> waiting for ACK */
-			RadioState = Rx;
-			HAL_TIM_Base_Start_IT(&htim3);
+			/* TxDone */
 		}
 		else if(RadioState == Rx)
 		{

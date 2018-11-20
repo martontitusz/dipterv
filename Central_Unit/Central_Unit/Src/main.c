@@ -81,8 +81,10 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN 0 */
 uint8_t NumberOfAvailablePackets = 0;
 uint8_t I2C_TxBuffer[RADIO_PACKET_LENGTH];
-bool isI2CBusy		=	false;
-bool isAddressOk	=	false;
+bool isI2CBusy			= false;
+bool isAddressOk		= false;
+radioState_t RadioState = Sleep;
+bool RadioInRxMode		= false;
 /* USER CODE END 0 */
 
 /**
@@ -119,6 +121,7 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM3_Init();
   MX_USART1_UART_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -220,6 +223,25 @@ void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 	isI2CBusy = false;
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == LORA_DIO0_Pin)
+	{
+		/* TxDone or RxDone */
+		if (RadioState == Tx)
+		{
+			/* TxDone -> Retransmit or change State*/
+		}
+		else if (RadioState == Rx)
+		{
+			/* RxDone -> Packet processing */
+			RadioInRxMode = false;
+			RadioState = PacketReceived;
+			HAL_TIM_Base_Stop_IT(&htim2);
+		}
+	}
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -239,6 +261,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  if (htim->Instance == TIM2)
+  {
+	  RadioState = ChangeChannel;
+  }
   /* USER CODE END Callback 1 */
 }
 

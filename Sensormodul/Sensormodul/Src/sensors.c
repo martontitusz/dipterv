@@ -60,6 +60,6 @@ void SensorsTaskFunction(void const * argument)
 	{
 		SensorsGetData();
 		RadioState = PacketBuilding;
-		osDelay(20000);
+		osDelay(10000);
 	}
 }

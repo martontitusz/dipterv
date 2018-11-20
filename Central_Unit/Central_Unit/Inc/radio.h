@@ -14,14 +14,15 @@
 #include "cmsis_os.h"
 
 /* Defines */
-#define RADIO_PACKET_LENGTH			22	/* 22 bytes */
-#define RADIO_BUFFER_LENGTH			46
-#define RADIO_TEMPERATUREDATA_ID	1
-#define RADIO_HUMIDITYDATA_ID		2
-#define RADIO_ACK_MESSAGE_LENGTH	5	/* 5 byte */
-#define RADIO_ACK_MESSAGE			0x55
-#define RADIO_MAX_RETRANSMISSONS	10
-#define RADIO_ACK_RETRANSMISSIONS	10
+#define RADIO_PACKET_LENGTH				22	/* 22 bytes */
+#define RADIO_BUFFER_LENGTH				46
+#define RADIO_TEMPERATUREDATA_ID		1
+#define RADIO_HUMIDITYDATA_ID			2
+#define RADIO_ACK_MESSAGE_LENGTH		5	/* 5 byte */
+#define RADIO_ACK_MESSAGE				0x55
+#define RADIO_ACK_MAX_RETRANSMISSIONS	5
+#define RADIO_RX_TIMEOUT				2000
+#define RADIO_TX_TIMEOUT				2000
 
 union
 {
@@ -53,11 +54,19 @@ union radiopacket_union_t
 
 /* Function prototypes */
 void RadioInitLoraModule(void);
-void RadioConfigLoraModule(uint8_t channel);
-uint8_t RadioChangeChannel(uint8_t old_channel);
-void RadioTransmitPacket(uint8_t* message_buffer, int message_length);
 uint8_t RadioReceivePacket(void);
-void RadioTransmitAck(void);
+
+/* StateMachine Functions: */
+void RadioStateMachineFunction(void);
+void RadioTxStateFunction(void);
+void RadioRxStateFunction(void);
+void RadioPacketReceivedStateFunction(void);
+void RadioSelectChannel(void);
+void RadioChangeChannelStateFunction(void);
+void RadioStandbyStateFunction(void);
+void RadioSleepStateFunction(void);
+
+/***************************/
 
 void RadioTaskFunction(void const * argument);
 
