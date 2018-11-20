@@ -12,10 +12,10 @@ from rpi_cu_i2c import *
 from rpi_database import *
 
 #---SENSOR DEFINITIONS---
-sensorId1 = ["0x42003c", "0x5246500e", "0x20383352"]
-sensorId2 = ["0x4a002e", "0x5246500e", "0x20383352"]
-sensor1IdFull = sensorId1[0]+sensorId1[1]+sensorId1[2]
-sensor2IdFull = sensorId2[0]+sensorId2[1]+sensorId2[2]
+sensorId1       = ["0x42003c", "0x5246500e", "0x20383352"]
+sensorId2       = ["0x4a002e", "0x5246500e", "0x20383352"]
+sensor1IdFull   = sensorId1[0]+sensorId1[1]+sensorId1[2]
+sensor2IdFull   = sensorId2[0]+sensorId2[1]+sensorId2[2]
 
 #---I2C DEFINITIONS---
 slaveAddress    = 17
@@ -101,7 +101,10 @@ labelSensor1Update      = Label(window,
                                 borderwidth="0",
                                 relief     ="solid")
 lastTimeStamp1 = getLastTimeStampByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
-labelSensor1Update.config(text=lastTimeStamp1[0])
+if lastTimeStamp1:
+    labelSensor1Update.config(text=lastTimeStamp1[0])
+else:
+    labelSensor1Update.config(text="No data")
 labelSensor1Update.grid(row=3, column=0)
 
 labelSensor2Update      = Label(window,
@@ -112,7 +115,10 @@ labelSensor2Update      = Label(window,
                                 borderwidth="0",
                                 relief     ="solid")
 lastTimeStamp2 = getLastTimeStampByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
-labelSensor2Update.config(text=lastTimeStamp1[0])
+if lastTimeStamp2:
+    labelSensor2Update.config(text=lastTimeStamp1[0])
+else:
+    labelSensor2Update.config(text="No data")
 labelSensor2Update.grid(row=3, column=1)
 
 labelSensor1Data        = Label(window,
@@ -125,7 +131,10 @@ labelSensor1Data        = Label(window,
                                 relief     ="solid")
 lastTemp1    = getLastTemperatureByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
 lastHum1     = getLastHumidityByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
-labelSensor1Data.config(text=str(lastTemp1[0])+"°C\n"+str(lastHum1[0])+"%")
+if lastTemp1 and lastHum1:
+    labelSensor1Data.config(text=str(format(lastTemp1[0], '.2f'))+"°C\n"+str(format(lastHum1[0], '.2f'))+"%")
+else:
+    labelSensor1Data.config(text="No data")
 labelSensor1Data.grid(row=4, column=0)
 
 labelSensor2Data        = Label(window,
@@ -138,7 +147,10 @@ labelSensor2Data        = Label(window,
                                 relief     ="solid")
 lastTemp2    = getLastTemperatureByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
 lastHum2     = getLastHumidityByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
-labelSensor2Data.config(text=str(lastTemp2[0])+"°C\n"+str(lastHum2[0])+"%")
+if lastTemp2 and lastHum2:
+    labelSensor2Data.config(text=str(format(lastTemp2[0], '.2f'))+"°C\n"+str(format(lastHum2[0], '.2f'))+"%")
+else:
+    labelSensor2Data.config(text="No data")
 labelSensor2Data.grid(row=4, column=1)
 
 labelReceivedPackages   = Label(window,
@@ -161,7 +173,10 @@ labelSensor1Packages    = Label(window,
                                 borderwidth="0",
                                 relief     ="solid")
 packets1     = getNumberOfPacketsByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
-labelSensor1Packages.config(text=str(packets1[0]))
+if (len(packets1) > 0):
+    labelSensor1Packages.config(text=str(packets1[0]))
+else:
+    labelSensor1Packages.config(text="0")
 labelSensor1Packages.grid(row=6, column=0)
 
 labelSensor2Packages    = Label(window,
@@ -173,7 +188,10 @@ labelSensor2Packages    = Label(window,
                                 borderwidth="0",
                                 relief     ="solid")
 packets2     = getNumberOfPacketsByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
-labelSensor2Packages.config(text=str(packets2[0]))
+if (len(packets2) > 0):
+    labelSensor2Packages.config(text=str(packets2[0]))
+else:
+    labelSensor2Packages.config(text="0")
 labelSensor2Packages.grid(row=6, column=1)
 
 #---FUNCTIONS---
@@ -190,10 +208,13 @@ def gpioEventCallbackFunction(input_int):
     I2C_GetDataFunction()
 
 def getArrowSymbol(old, new):
-    if old < new:
-        return "⇑ "
-    elif old > new:
-        return "⇓ "
+    if old and new:
+        if old < new:
+            return "⇑ "
+        elif old > new:
+            return "⇓ "
+        else:
+            return "  "
     else:
         return "  "
 
@@ -227,24 +248,34 @@ def I2C_GetDataFunction():
         if id_string == sensor1IdFull:
             lastTemp    = getLastTemperatureByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
             lastHum     = getLastHumidityByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
-            arrowTemp   = getArrowSymbol(lastTemp, Temperature)
-            arrowHum    = getArrowSymbol(lastHum, Humidity)
+            
+            if lastTemp and lastHum:
+                arrowTemp   = getArrowSymbol(lastTemp[0], Temperature)
+                arrowHum    = getArrowSymbol(lastHum[0], Humidity)
+            else:
+                arrowTemp   = getArrowSymbol(0, 0)
+                arrowHum    = getArrowSymbol(0, 0)
+
             packets     = getNumberOfPacketsByDeviceId(sensorId1[0],sensorId1[1],sensorId1[2])
 
             labelSensor1Update.config(text=time_string)
-            labelSensor1Data.config(text=arrowTemp+str(Temperature)+"°C\n"+arrowHum+str(Humidity)+"%")
-            labelSensor1Packages.config(text=str(packets))
+            labelSensor1Data.config(text=arrowTemp+str(format(Temperature, '.2f'))+"°C\n"+arrowHum+str(format(Humidity, '.2f'))+"%")
+            labelSensor1Packages.config(text=str(packets[0]))
             
         elif id_string == sensor2IdFull:
             lastTemp    = getLastTemperatureByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
             lastHum     = getLastHumidityByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
-            arrowTemp   = getArrowSymbol(lastTemp, Temperature)
-            arrowHum    = getArrowSymbol(lastHum, Humidity)
+            if lastTemp and lastHum:
+                arrowTemp   = getArrowSymbol(lastTemp[0], Temperature)
+                arrowHum    = getArrowSymbol(lastHum[0], Humidity)
+            else:
+                arrowTemp   = getArrowSymbol(0, 0)
+                arrowHum    = getArrowSymbol(0, 0)
             packets     = getNumberOfPacketsByDeviceId(sensorId2[0],sensorId2[1],sensorId2[2])
 
             labelSensor2Update.config(text=time_string)
-            labelSensor2Data.config(text=arrowTemp+str(Temperature)+"°C\n"+arrowHum+str(Humidity)+"%")
-            labelSensor2Packages.config(text=str(packets))
+            labelSensor2Data.config(text=arrowTemp+str(format(Temperature, '.2f'))+"°C\n"+arrowHum+str(format(Humidity, '.2f'))+"%")
+            labelSensor2Packages.config(text=str(packets[0]))
             
         else:
             print("Invalid SensorId")

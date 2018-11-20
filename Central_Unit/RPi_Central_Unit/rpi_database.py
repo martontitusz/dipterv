@@ -101,7 +101,7 @@ def getAll():
         c.execute("""SELECT * FROM sensors""")
         return c.fetchall()
 
-
+#droptable()
 #createTable()
 
 #newdata1 = SensorData("2018-11-19 15:47:59", "0x42003c", "0x5246500e", "0x20383352", 1, 1, 28.2, 2, 62.2)
