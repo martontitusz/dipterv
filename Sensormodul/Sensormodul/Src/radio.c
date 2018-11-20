@@ -184,6 +184,7 @@ void RadioPacketBuildingStateFunction(void)
 
 void RadioTxStateFunction(void)
 {
+	HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_SET);
 	if (RetransmitCounter == RADIO_MAX_RETRANSMISSONS)
 	{
 		RetransmitCounter = 0;
@@ -191,9 +192,14 @@ void RadioTxStateFunction(void)
 	}
 	else
 	{
+		if(!RetransmitCounter)
+		{
+			SX1278_LoRaEntryTx(&SX1278, RADIO_PACKET_LENGTH, RADIO_TX_TIMEOUT);
+		}
 		RetransmitCounter++;
-		SX1278_transmit(&SX1278, RadioPacket.bytes, RADIO_PACKET_LENGTH, RADIO_TX_TIMEOUT);
+		SX1278_LoRaTxPacket(&SX1278, RadioPacket.bytes, RADIO_PACKET_LENGTH, RADIO_TX_TIMEOUT);
 	}
+	HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
 }
 
 void RadioRxStateFunction(void)
@@ -210,7 +216,7 @@ void RadioPacketReceivedStateFunction(void)
 {
 	RadioReceivePacket();
 
-	if (RxBuffer[0] == RADIO_ACK_MESSAGE)
+	if (RxBuffer[0] == (uint8_t)RADIO_ACK_MESSAGE)
 	{
 		RadioState = Sleep;
 	}
@@ -252,39 +258,39 @@ void RadioTaskFunction(void const * argument)
 	for(;;)
 	{
 //	FOR TEST AND DEBUG:
-//		switch (RadioState)
-//		{
-//			case Tx:
-//			{
-//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_SET);
-//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
-//				break;
-//			}
-//			case Rx:
-//			{
-//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_SET);
-//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
-//				break;
-//			}
-//			case Sleep:
-//			{
-//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_SET);
-//				break;
-//			}
-//			default:
-//			{
-//				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
-//				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
-//				break;
-//			}
-//		}
+		switch (RadioState)
+		{
+			case Tx:
+			{
+				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_SET);
+				//HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
+				break;
+			}
+			case Sleep:
+			{
+				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
+				//HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_SET);
+				break;
+			}
+			case Rx:
+			{
+				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_SET);
+				//HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_SET);
+				break;
+			}
+			default:
+			{
+				HAL_GPIO_WritePin(USER_GPIO0_GPIO_Port, USER_GPIO0_Pin, GPIO_PIN_RESET);
+				//HAL_GPIO_WritePin(USER_GPIO1_GPIO_Port, USER_GPIO1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(USER_GPIO2_GPIO_Port, USER_GPIO2_Pin, GPIO_PIN_RESET);
+				break;
+			}
+		}
 		RadioStateMachineFunction();
 
-		osDelay(10);
+		osDelay(1);
 	}
 }

@@ -69,6 +69,7 @@
 #define LED1_GPIO_Port GPIOA
 #define LORA_DIO0_Pin GPIO_PIN_3
 #define LORA_DIO0_GPIO_Port GPIOA
+#define LORA_DIO0_EXTI_IRQn EXTI3_IRQn
 #define LORA_SPI_NSS_Pin GPIO_PIN_4
 #define LORA_SPI_NSS_GPIO_Port GPIOA
 #define LORA_SPI_SCK_Pin GPIO_PIN_5
@@ -121,6 +122,7 @@
 #define RPI_I2C_SDA_GPIO_Port GPIOB
 #define USER_BTN_Pin GPIO_PIN_9
 #define USER_BTN_GPIO_Port GPIOB
+#define USER_BTN_EXTI_IRQn EXTI9_5_IRQn
 
 /* ########################## Assert Selection ############################## */
 /**
@@ -132,6 +134,16 @@
 /* USER CODE BEGIN Private defines */
 #define RPI_GPIO_I2C_BUSY_PIN	RPI_GPIO1_Pin
 #define RPI_GPIO_I2C_BUSY_PORT	RPI_GPIO1_GPIO_Port
+
+typedef enum StateEnum
+{
+	Tx,
+	Rx,
+	PacketReceived,
+	ChangeChannel,
+	Standby,
+	Sleep
+} radioState_t;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

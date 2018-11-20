@@ -274,19 +274,23 @@ int SX1278_LoRaEntryTx(SX1278_t * module, uint8_t length, uint32_t timeout) {
 	}
 }
 
-int SX1278_LoRaTxPacket(SX1278_t * module, uint8_t* txBuffer, uint8_t length,
-		uint32_t timeout) {
+int SX1278_LoRaTxPacket(SX1278_t * module, uint8_t* txBuffer, uint8_t length, uint32_t timeout)
+{
 	SX1278_SPIBurstWrite(module, 0x00, txBuffer, length);
-	SX1278_SPIWrite(module, LR_RegOpMode, 0x8b);	//Tx Mode
-	while (1) {
-		if (SX1278_hw_GetDIO0(module->hw)) { //if(Get_NIRQ()) //Packet send over
+	SX1278_SPIWrite(module, LR_RegOpMode, 0x8b);		//Tx Mode
+
+	while (1)
+	{
+		if (SX1278_hw_GetDIO0(module->hw))				//if(Get_NIRQ()) //Packet send over
+		{
 			SX1278_SPIRead(module, LR_RegIrqFlags);
-			SX1278_clearLoRaIrq(module); //Clear irq
-			SX1278_standby(module); //Entry Standby mode
+			SX1278_clearLoRaIrq(module);				//Clear irq
+			SX1278_standby(module);						//Entry Standby mode
 			return 1;
 		}
 
-		if (--timeout == 0) {
+		if (--timeout == 0)
+		{
 			SX1278_hw_Reset(module->hw);
 			SX1278_defaultConfig(module);
 			return 0;

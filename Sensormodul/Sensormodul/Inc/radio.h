@@ -23,8 +23,8 @@
 #define RADIO_RX_TIMEOUT			2000
 #define RADIO_TX_TIMEOUT			2000
 
-#define RADIO_BANDWIDTH				SX1278_LORA_BW_15_6KHZ
-//#define RADIO_BANDWIDTH				SX1278_LORA_BW_20_8KHZ
+//#define RADIO_BANDWIDTH				SX1278_LORA_BW_15_6KHZ	//Sensormodul1
+#define RADIO_BANDWIDTH				SX1278_LORA_BW_20_8KHZ		//Sensormodul2
 
 /* Variables */
 union {
