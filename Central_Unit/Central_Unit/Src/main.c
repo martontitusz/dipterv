@@ -60,6 +60,7 @@
 #include "led.h"
 #include "SX1278.h"
 #include "radio.h"
+#include "RaspberryPi.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -79,12 +80,6 @@ void MX_FREERTOS_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint8_t NumberOfAvailablePackets = 0;
-uint8_t I2C_TxBuffer[RADIO_PACKET_LENGTH];
-bool isI2CBusy			= false;
-bool isAddressOk		= false;
-radioState_t RadioState = Sleep;
-bool RadioInRxMode		= false;
 /* USER CODE END 0 */
 
 /**
@@ -212,15 +207,10 @@ void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 	HAL_I2C_EnableListen_IT(&hi2c1);
 }
 
-void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
-{
-	isAddressOk = true;
-}
-
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	HAL_I2C_EnableListen_IT(&hi2c1);
-	isI2CBusy = false;
+	RaspberryPiSetI2CState(I2CLAZY);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -228,15 +218,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	if (GPIO_Pin == LORA_DIO0_Pin)
 	{
 		/* TxDone or RxDone */
-		if (RadioState == Tx)
-		{
-			/* TxDone -> Retransmit or change State*/
-		}
-		else if (RadioState == Rx)
+		if (RadioGetState() == Rx)
 		{
 			/* RxDone -> Packet processing */
-			RadioInRxMode = false;
-			RadioState = PacketReceived;
+			RadioSetRxModeState(RADIO_NOT_INRXMODE);
+			RadioSetState(PacketReceived);
 			HAL_TIM_Base_Stop_IT(&htim2);
 		}
 	}
@@ -263,7 +249,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM2)
   {
-	  RadioState = ChangeChannel;
+	  RadioSetState(ChangeChannel);
   }
   /* USER CODE END Callback 1 */
 }

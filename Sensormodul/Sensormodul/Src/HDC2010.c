@@ -7,22 +7,6 @@
 
 #include "HDC2010.h"
 
-/* Functions */
-
-int16_t HDC2010_ConcatenateTo16Bits(int8_t highByte, int8_t lowByte)
-{
-	return (int16_t)(highByte << 8) | lowByte;
-}
-
-float HDC2010_CalculateTemperature(int16_t temp16)
-{
-	return (temp16 * 0.0025177f) - 40.0f;
-}
-
-float HDC2010_CalculateHumidity(int16_t hum16)
-{
-	return (hum16 * 0.001525878f);
-}
 
 int HDC2010_TriggerMeasurement(void)
 {

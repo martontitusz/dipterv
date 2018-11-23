@@ -50,14 +50,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
 /* USER CODE BEGIN 0 */
-
+#include "RaspberryPi.h"
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-extern bool isI2CBusy;
 /* USER CODE END 1 */
 
 /** Configure pins as 
@@ -156,7 +155,7 @@ void GPIOTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		if (isI2CBusy)
+		if ( RaspberryPiGetI2CState() )
 		{
 			HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, GPIO_PIN_SET);
 		}
@@ -164,7 +163,7 @@ void GPIOTaskFunction(void const * argument)
 		{
 			HAL_GPIO_WritePin(RPI_GPIO_I2C_BUSY_PORT, RPI_GPIO_I2C_BUSY_PIN, GPIO_PIN_RESET);
 		}
-		osDelay(10);
+		osDelay(1);
 	}
 }
 

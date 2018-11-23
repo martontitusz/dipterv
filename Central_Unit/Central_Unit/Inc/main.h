@@ -137,12 +137,9 @@
 
 typedef enum StateEnum
 {
-	Tx,
 	Rx,
 	PacketReceived,
-	ChangeChannel,
-	Standby,
-	Sleep
+	ChangeChannel
 } radioState_t;
 /* USER CODE END Private defines */
 

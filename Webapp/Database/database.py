@@ -138,4 +138,5 @@ def droptable():
     with conn:
         c.execute("""DROP TABLE sensors""")
 
+#droptable()
 createTable()

@@ -37,9 +37,6 @@
 #define HDC2010_REG_DEVICE_ID_HIGH			0xFF
 
 /* Function Prototypes */
-int16_t HDC2010_ConcatenateTo16Bits(int8_t highByte, int8_t lowByte);
-float HDC2010_CalculateTemperature(int16_t temp16);
-float HDC2010_CalculateHumidity(int16_t hum16);
 int HDC2010_TriggerMeasurement(void);
 int HDC2010_GetTemperature(uint8_t* temperaturebuffer);
 int HDC2010_GetHumidity(uint8_t* humiditybuffer);

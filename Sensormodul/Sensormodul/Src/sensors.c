@@ -6,11 +6,11 @@
  */
 
 #include "sensors.h"
+#include "radio.h"
 
 extern osMessageQId TemperatureQueueHandle;
 extern osMessageQId HumidityQueueHandle;
 
-extern radioState_t RadioState;
 uint8_t TemperatureBuffer[2];
 uint8_t HumidityBuffer[2];
 
@@ -27,7 +27,7 @@ void SensorsTriggerMeasurement(void)
 void SensorsGetTemperature(void)
 {
 	HDC2010_GetTemperature(TemperatureBuffer);
-	if (xQueueSendToBack(TemperatureQueueHandle, (void *) &pTemperature, (TickType_t)10) != pdPASS)
+	if ( xQueueSendToBack(TemperatureQueueHandle, (void *) &pTemperature, (TickType_t)10) != pdPASS )
 	{
 		/* Failed to post the message, even after 10 ticks. */
 		while(1);
@@ -37,7 +37,7 @@ void SensorsGetTemperature(void)
 void SensorsGetHumidity(void)
 {
 	HDC2010_GetHumidity(HumidityBuffer);
-	if (xQueueSendToBack(HumidityQueueHandle, (void *) &pHumidity, (TickType_t)10) != pdPASS)
+	if ( xQueueSendToBack(HumidityQueueHandle, (void *) &pHumidity, (TickType_t)10) != pdPASS )
 	{
 		/* Failed to post the message, even after 10 ticks. */
 		while(1);
@@ -59,7 +59,7 @@ void SensorsTaskFunction(void const * argument)
 	for(;;)
 	{
 		SensorsGetData();
-		RadioState = PacketBuilding;
-		osDelay(10000);
+		RadioSetState(PacketBuilding);
+		osDelay(60000);		/* 60000 ms = 60 sec = 1 min */
 	}
 }

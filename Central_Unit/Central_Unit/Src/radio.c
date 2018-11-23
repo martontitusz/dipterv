@@ -7,8 +7,12 @@
 
 #include "radio.h"
 
-SX1278_hw_t	SX1278_hw;
-SX1278_t	SX1278;
+extern SPI_HandleTypeDef		hspi1;
+extern TIM_HandleTypeDef 		htim2;
+extern osMessageQId 			RadioPacketQueueHandle;
+
+SX1278_hw_t						SX1278_hw;
+SX1278_t						SX1278;
 
 uint8_t UsedChannels[]		= {	//SX1278_LORA_BW_7_8KHZ,
 								//SX1278_LORA_BW_10_4KHZ,
@@ -23,83 +27,54 @@ uint8_t UsedChannels[]		= {	//SX1278_LORA_BW_7_8KHZ,
 								};
 uint8_t ChannelIndex		=	0;
 uint8_t NrOfUsedChannels	=	sizeof(UsedChannels);
+uint8_t RadioRxModeState	=	RADIO_NOT_INRXMODE;
+radioState_t RadioState		=	Rx;
+struct	radiopacket_t			*pRadioRxPacket;
 
-uint8_t TxBuffer[5]			= {	RADIO_ACK_MESSAGE,
-								RADIO_ACK_MESSAGE,
-								RADIO_ACK_MESSAGE,
-								RADIO_ACK_MESSAGE,
-								RADIO_ACK_MESSAGE };
-uint8_t	RetransmitCounter	=	0;
+uint32_t DeviceIdSM1[3]		=	{0x42003c,0x5246500e,0x20383352};
+uint32_t DeviceIdSM2[3]		=	{0x4a002e,0x5246500e,0x20383352};
 
-bool	RadioInSleepMode	=	false;
+uint32_t LastPacketIdSM1	=	0;
+uint32_t LastPacketIdSM2	=	0;
 
-extern bool						RadioInRxMode;
-struct radiopacket_t			*pRadioRxPacket;
-extern SPI_HandleTypeDef		hspi1;
-extern TIM_HandleTypeDef 		htim2;
-extern osMessageQId 			RadioPacketQueueHandle;
-extern radioState_t 			RadioState;
 
+radioState_t RadioGetState(void)
+{
+	return RadioState;
+}
+
+void RadioSetState(radioState_t new_state)
+{
+	RadioState = new_state;
+}
+
+uint8_t RadioGetRxModeState(void)
+{
+	return RadioRxModeState;
+}
+
+void RadioSetRxModeState(uint8_t new)
+{
+	RadioRxModeState = new;
+}
 
 void RadioInitLoraModule(void)
 {
-	SX1278_hw.dio0.port		= LORA_DIO0_GPIO_Port;
-	SX1278_hw.dio0.pin		= LORA_DIO0_Pin;
-	SX1278_hw.nss.port		= LORA_SPI_NSS_GPIO_Port;
-	SX1278_hw.nss.pin		= LORA_SPI_NSS_Pin;
-	SX1278_hw.reset.port	= NULL;
-	SX1278_hw.reset.pin 	= 0;
-	SX1278_hw.spi			= &hspi1;
+	SX1278_hw.dio0.port		=	LORA_DIO0_GPIO_Port;
+	SX1278_hw.dio0.pin		=	LORA_DIO0_Pin;
+	SX1278_hw.nss.port		=	LORA_SPI_NSS_GPIO_Port;
+	SX1278_hw.nss.pin		=	LORA_SPI_NSS_Pin;
+	SX1278_hw.reset.port	=	NULL;
+	SX1278_hw.reset.pin 	=	0;
+	SX1278_hw.spi			=	&hspi1;
 
-	SX1278.hw				= &SX1278_hw;
+	SX1278.hw				=	&SX1278_hw;
 }
 
-uint8_t RadioReceivePacket(void)
-{
-	uint8_t received_bytes = SX1278_LoRaRxPacket(&SX1278);
-
-	if (received_bytes > 0)
-	{
-		SX1278_read(&SX1278, RadioPacket.bytes, received_bytes);
-		if (xQueueSendToBack(RadioPacketQueueHandle, (void *) &pRadioRxPacket, (TickType_t)10) != pdPASS)
-		{
-			/* Failed to post the message, even after 10 ticks. */
-			while(1);
-		}
-
-		if (RadioPacket.packet.deviceId[0]==0x42003c)
-		{
-			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-		}
-		else if (RadioPacket.packet.deviceId[0]==0x4a002e)
-		{
-			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-		}
-		else
-		{
-			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-		}
-
-		return 0;
-	}
-
-	return 1;
-}
-
-/********************************/
-/* StateMachine */
 void RadioStateMachineFunction(void)
 {
-	switch (RadioState)
+	switch ( RadioGetState() )
 	{
-		case Tx:
-		{
-			RadioTxStateFunction();
-			break;
-		}
 		case Rx:
 		{
 			RadioRxStateFunction();
@@ -115,58 +90,90 @@ void RadioStateMachineFunction(void)
 			RadioChangeChannelStateFunction();
 			break;
 		}
-		case Standby:
-		{
-			RadioStandbyStateFunction();
-			break;
-		}
-		case Sleep:
-		{
-			RadioSleepStateFunction();
-			break;
-		}
 		default:
 		{
-			RadioSleepStateFunction();
 			break;
 		}
-	}
-}
-
-void RadioTxStateFunction(void)
-{
-	if (RetransmitCounter == RADIO_ACK_MAX_RETRANSMISSIONS)
-	{
-		RetransmitCounter = 0;
-		RadioState = ChangeChannel;
-	}
-	else
-	{
-		if (!RetransmitCounter)
-		{
-			SX1278_LoRaEntryTx(&SX1278, RADIO_ACK_MESSAGE_LENGTH, RADIO_TX_TIMEOUT);
-		}
-		TxBuffer[4] = RetransmitCounter;
-		SX1278_LoRaTxPacket(&SX1278, TxBuffer, RADIO_PACKET_LENGTH, RADIO_TX_TIMEOUT);
-		RetransmitCounter++;
 	}
 }
 
 void RadioRxStateFunction(void)
 {
-	if (!RadioInRxMode)
+	if ( !RadioGetRxModeState() )
 	{
 		SX1278_receive(&SX1278, RADIO_PACKET_LENGTH, RADIO_RX_TIMEOUT);
-		RadioInRxMode = true;
+		RadioSetRxModeState(RADIO_INRXMODE);
 		HAL_TIM_Base_Start_IT(&htim2);
 	}
 	else {}
 }
 
+uint8_t RadioReceivePacket(void)
+{
+	uint8_t received_bytes = SX1278_LoRaRxPacket(&SX1278);
+
+	if (received_bytes > 0)
+	{
+		SX1278_read(&SX1278, RadioPacket.bytes, received_bytes);
+
+		if ( RadioComparePackets() )
+		{
+			if (xQueueSendToBack(RadioPacketQueueHandle, (void *) &pRadioRxPacket, (TickType_t)10) != pdPASS)
+			{
+				/* Failed to post the message, even after 10 ticks. */
+				while(1);
+			}
+			return 0;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+
+	return 2;
+}
+
+uint8_t RadioComparePackets(void)
+{
+	if (	(DeviceIdSM1[0] == RadioPacket.packet.deviceId[0]) &&
+			(DeviceIdSM1[1] == RadioPacket.packet.deviceId[1]) &&
+			(DeviceIdSM1[2] == RadioPacket.packet.deviceId[2])		)
+	{
+		if (LastPacketIdSM1 == RadioPacket.packet.packetId)
+		{
+			return 0;
+		}
+		else
+		{
+			LastPacketIdSM1 = RadioPacket.packet.packetId;
+			return 1;
+		}
+	}
+	else if((DeviceIdSM2[0] == RadioPacket.packet.deviceId[0]) &&
+			(DeviceIdSM2[1] == RadioPacket.packet.deviceId[1]) &&
+			(DeviceIdSM2[2] == RadioPacket.packet.deviceId[2])		)
+	{
+		if (LastPacketIdSM2 == RadioPacket.packet.packetId)
+		{
+			return 0;
+		}
+		else
+		{
+			LastPacketIdSM2 = RadioPacket.packet.packetId;
+			return 1;
+		}
+	}
+	else
+	{
+		return 2;
+	}
+}
+
 void RadioPacketReceivedStateFunction(void)
 {
 	RadioReceivePacket();
-	RadioState = ChangeChannel;
+	RadioSetState(ChangeChannel);
 }
 
 void RadioSelectChannel(void)
@@ -185,26 +192,9 @@ void RadioSelectChannel(void)
 void RadioChangeChannelStateFunction(void)
 {
 	RadioSelectChannel();
-
-	RadioState = Rx;
+	RadioSetState(Rx);
 }
 
-void RadioStandbyStateFunction(void)
-{
-	SX1278_standby(&SX1278);
-}
-
-void RadioSleepStateFunction(void)
-{
-	if (!RadioInSleepMode)
-	{
-		RadioInSleepMode = true;
-		SX1278_sleep(&SX1278);
-	}
-	else {}
-}
-
-/********************************/
 
 /* RadioTaskFunction function */
 void RadioTaskFunction(void const * argument)
@@ -213,9 +203,6 @@ void RadioTaskFunction(void const * argument)
 	SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8, UsedChannels[ChannelIndex], 10);
 
 	pRadioRxPacket = & RadioPacket.packet;
-
-	RadioState = Rx;
-	SX1278_receive(&SX1278, RADIO_PACKET_LENGTH, RADIO_RX_TIMEOUT);
 
 	for(;;)
 	{

@@ -66,15 +66,6 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
-float Temperature	= 0.0;
-float Humidity		= 0.0;
-
-uint8_t TemperatureBuffer[2];
-uint8_t HumidityBuffer[2];
-bool dataAvailable = false;
-
-radioState_t RadioState = PacketBuilding;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -221,25 +212,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if (GPIO_Pin == LORA_DIO0_Pin)
-	{
-		/* TxDone or RxDone */
-		if (RadioState == Tx)
-		{
-			/* TxDone */
-		}
-		else if(RadioState == Rx)
-		{
-			/* RxDone, if message is ACK -> go to sleep */
-			RadioState = PacketReceived;
-			HAL_TIM_Base_Stop_IT(&htim3);
-		}
-		else {}
-	}
-}
-
 /* USER CODE END 4 */
 
 /**
@@ -263,7 +235,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM3)
   {
 	  HAL_TIM_Base_Stop_IT(&htim3);
-	  RadioState = Tx;
+	  RadioSetState(Tx);
   }
   /* USER CODE END Callback 1 */
 }

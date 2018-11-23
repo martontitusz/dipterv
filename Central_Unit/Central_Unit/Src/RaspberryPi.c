@@ -7,14 +7,34 @@
 
 #include "RaspberryPi.h"
 
-extern osMessageQId RadioPacketQueueHandle;
-extern I2C_HandleTypeDef hi2c1;
-extern bool isI2CBusy;
-union radiopacket_union_t tempRadioPacket;
-extern uint8_t NumberOfAvailablePackets;
+extern	osMessageQId					RadioPacketQueueHandle;
+extern	I2C_HandleTypeDef				hi2c1;
 
-struct radiopacket_t *pRxPacket;
+struct 	radiopacket_t					*pRxPacket;
+union	radiopacket_union_t				tempRadioPacket;
+uint8_t NumberOfAvailablePackets	= 	0;
+uint8_t I2CState					=	I2CLAZY;
 
+
+uint8_t RaspberryPiGetNumberOfAvailablePackets(void)
+{
+	return NumberOfAvailablePackets;
+}
+
+void RaspberryPiSetNumberOfAvailablePackets(uint8_t new)
+{
+	NumberOfAvailablePackets = new;
+}
+
+uint8_t RaspberryPiGetI2CState(void)
+{
+	return I2CState;
+}
+
+void RaspberryPiSetI2CState(uint8_t new)
+{
+	I2CState = new;
+}
 
 void RaspberryPiFillI2CBuffer(void)
 {
@@ -44,14 +64,14 @@ void RaspberryPiTaskFunction(void const * argument)
 
 	for(;;)
 	{
-		NumberOfAvailablePackets = uxQueueMessagesWaiting(RadioPacketQueueHandle);
+		RaspberryPiSetNumberOfAvailablePackets( uxQueueMessagesWaiting(RadioPacketQueueHandle) );
 
-		if (isI2CBusy == false)
+		if ( !RaspberryPiGetI2CState() )
 		{
 			if (NumberOfAvailablePackets != 0)
 			{
 				RaspberryPiFillI2CBuffer();
-				isI2CBusy = true;
+				RaspberryPiSetI2CState(I2CBUSY);
 			}
 		}
 

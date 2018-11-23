@@ -113,9 +113,6 @@ typedef enum StateEnum
 {
 	PacketBuilding,
 	Tx,
-	Rx,
-	PacketReceived,
-	Standby,
 	Sleep
 } radioState_t;
 
