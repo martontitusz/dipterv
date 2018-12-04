@@ -123,7 +123,7 @@ table {
     padding: 3px 2px;
   }
   table tbody td {
-    font-size: 18px;
+    font-size: 16px;
   }
   table tr:nth-child(even) {
     background: #D0E4F5;
@@ -137,7 +137,7 @@ table {
   }
 
  table thead th {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
     color: #FFFFFF;
     border-left: 2px solid #D0E4F5;

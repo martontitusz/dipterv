@@ -50,6 +50,13 @@ union radiopacket_union_t
 	uint8_t bytes[22];
 } RadioPacket;
 
+typedef enum StateEnum
+{
+	Rx,
+	PacketReceived,
+	ChangeChannel
+} radioState_t;
+
 /* Function prototypes */
 radioState_t RadioGetState(void);
 void RadioSetState(radioState_t new_state);

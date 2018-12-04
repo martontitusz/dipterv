@@ -135,12 +135,7 @@
 #define RPI_GPIO_I2C_BUSY_PIN	RPI_GPIO1_Pin
 #define RPI_GPIO_I2C_BUSY_PORT	RPI_GPIO1_GPIO_Port
 
-typedef enum StateEnum
-{
-	Rx,
-	PacketReceived,
-	ChangeChannel
-} radioState_t;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
